@@ -2,7 +2,7 @@ import { Platform } from "obsidian";
 
 export interface FolderNameValidationResult {
   isValid: boolean;
-  message: string;
+  message: string | null;
 }
 
 function getInvalidFolderCharactersForCurrentPlatform(): string[] {
@@ -114,6 +114,6 @@ export function validateFolderNameForCurrentPlatform(folderName: string): Folder
 
   return {
     isValid: true,
-    message: `Valid on ${getCurrentPlatformLabel()}.`,
+    message: null,
   };
 }

@@ -28,6 +28,14 @@
   gap: 0.6rem;
 }
 
+.move-to-new-folder-modal .move-to-new-folder-section-parent {
+  order: 1;
+}
+
+.move-to-new-folder-modal .move-to-new-folder-section-name {
+  order: 2;
+}
+
 .move-to-new-folder-modal .move-to-new-folder-label {
   color: var(--text-muted);
   font-size: var(--font-ui-small);
@@ -60,9 +68,7 @@
 .move-to-new-folder-modal .move-to-new-folder-validation {
   font-size: var(--font-ui-small);
   line-height: 1.35;
-}
-
-.move-to-new-folder-modal .move-to-new-folder-validation.is-valid {
+  min-height: 1.2em;
   color: var(--text-muted);
 }
 

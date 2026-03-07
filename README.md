@@ -1,13 +1,13 @@
 # Move to New Folder
 
-`Move to New Folder` is an Obsidian community plugin that improves the workflow for moving a note into a newly created folder.
+`Move to New Folder` is an Obsidian community plugin that improves the workflow for moving a file or folder into a newly created folder.
 
 Instead of typing a full destination path manually, it uses a single focused modal:
 
 1. Choose an existing parent folder from a searchable picker.
 2. Enter the new child folder name in the same dialog.
 
-Then the plugin creates the folder (if needed) and moves the note safely.
+Then the plugin creates the folder (if needed) and moves the target safely.
 
 ## Features
 
@@ -19,7 +19,7 @@ Then the plugin creates the folder (if needed) and moves the note safely.
 - Searchable parent-folder picker with keyboard and mouse navigation
 - Single modal for parent-folder selection and new-folder naming
 - Inline folder-name validation based on the current Obsidian platform
-- Folder conflict handling:
+- New-folder conflict handling:
   - If folder exists, prompt to reuse or cancel
   - If a file exists at folder path, stop with an error notice
 - File conflict handling:
@@ -49,7 +49,7 @@ Then the plugin creates the folder (if needed) and moves the note safely.
 
 ## Usage
 
-### From file explorer
+### File explorer
 
 1. Right-click a markdown note.
 2. Choose `Move file to new folder...`.
@@ -57,21 +57,19 @@ Then the plugin creates the folder (if needed) and moves the note safely.
 4. Enter the new folder name.
 5. Confirm.
 
-1. Right-click a folder.
-2. Choose `Move folder to new folder...`.
-3. Pick a parent folder.
-4. Enter the new folder name.
-5. Confirm.
+6. Right-click a folder.
+7. Choose `Move folder to new folder...`.
+8. Pick a parent folder.
+9. Enter the new folder name.
+10. Confirm.
 
-### From command palette
+### Command palette
 
 1. Open the target markdown note.
 2. Run `Move file to new folder...`.
 3. Complete the same modal flow.
 
-1. Focus a folder context where available.
-2. Run `Move folder to new folder...`.
-3. Complete the same modal flow.
+4. For folders, use `Move folder to new folder...` when a folder context is available.
 
 ## Settings
 
@@ -102,6 +100,7 @@ Release assets:
 ## Known issue notes
 
 - Initial focus in the move modal is documented in [docs/investigations/focus.md](docs/investigations/focus.md). Several focus-workaround approaches were tried and intentionally reverted because they were too brittle.
+- Release-readiness status is tracked in [docs/release-readiness.md](docs/release-readiness.md).
 
 ## License
 

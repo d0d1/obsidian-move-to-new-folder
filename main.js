@@ -432,7 +432,6 @@ var MoveToNewFolderSettingTab = class extends import_obsidian4.PluginSettingTab 
   display() {
     const { containerEl } = this;
     containerEl.empty();
-    containerEl.createEl("h2", { text: "Move to New Folder settings" });
     new import_obsidian4.Setting(containerEl).setName("Default parent to current note folder").setDesc("When enabled, the folder picker starts from the current note's parent folder.").addToggle((toggle) => {
       toggle.setValue(this.plugin.settings.defaultToCurrentParent).onChange(async (value) => {
         this.plugin.settings.defaultToCurrentParent = value;
