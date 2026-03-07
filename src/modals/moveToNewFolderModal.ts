@@ -7,19 +7,30 @@ export interface MoveToNewFolderModalResult {
   folderName: string;
 }
 
+export type MoveTargetKind = "file" | "folder";
+
 export class MoveToNewFolderModal extends Modal {
   private readonly onCloseResolve: (result: MoveToNewFolderModalResult | null) => void;
+  private readonly targetKind: MoveTargetKind;
   private searchValue = "";
   private selectedIndex = 0;
   private selectedPath: string;
   private folderName = "";
+  private hasTriedSubmit = false;
+  private hasEditedFolderName = false;
   private readonly folderPaths: string[];
   private readonly listByPath: Map<string, HTMLButtonElement> = new Map();
   private didResolve = false;
 
-  constructor(app: App, initialPath: string, onCloseResolve: (result: MoveToNewFolderModalResult | null) => void) {
+  constructor(
+    app: App,
+    initialPath: string,
+    targetKind: MoveTargetKind,
+    onCloseResolve: (result: MoveToNewFolderModalResult | null) => void,
+  ) {
     super(app);
     this.selectedPath = initialPath;
+    this.targetKind = targetKind;
     this.onCloseResolve = onCloseResolve;
     this.folderPaths = this.collectFolderPaths();
 
@@ -35,11 +46,27 @@ export class MoveToNewFolderModal extends Modal {
     const { contentEl } = this;
     this.modalEl.addClass("move-to-new-folder-modal");
     contentEl.empty();
-    this.setTitle("Move file to new folder");
+    this.setTitle(this.targetKind === "folder" ? "Move folder to new folder" : "Move file to new folder");
 
     const layoutEl = contentEl.createDiv({ cls: "move-to-new-folder-layout" });
 
-    const parentSectionEl = layoutEl.createDiv({ cls: "move-to-new-folder-section" });
+    const nameSectionEl = layoutEl.createDiv({
+      cls: "move-to-new-folder-section move-to-new-folder-section-name",
+    });
+
+    const nameInput = nameSectionEl.createEl("input", {
+      type: "text",
+      placeholder: "New folder name",
+      cls: "move-to-new-folder-text-input",
+    });
+    nameInput.value = this.folderName;
+    const validationEl = nameSectionEl.createDiv({
+      cls: "move-to-new-folder-validation",
+    });
+
+    const parentSectionEl = layoutEl.createDiv({
+      cls: "move-to-new-folder-section move-to-new-folder-section-parent",
+    });
     parentSectionEl.createEl("label", {
       text: "Parent folder",
       cls: "move-to-new-folder-label",
@@ -55,18 +82,6 @@ export class MoveToNewFolderModal extends Modal {
       cls: "move-to-new-folder-search",
     });
     const listEl = parentSectionEl.createDiv({ cls: "move-to-new-folder-list" });
-
-    const nameSectionEl = layoutEl.createDiv({ cls: "move-to-new-folder-section" });
-
-    const nameInput = nameSectionEl.createEl("input", {
-      type: "text",
-      placeholder: "New folder name",
-      cls: "move-to-new-folder-text-input",
-    });
-    nameInput.value = this.folderName;
-    const validationEl = nameSectionEl.createDiv({
-      cls: "move-to-new-folder-validation",
-    });
 
     const updateSelectedParent = (): void => {
       selectedParentEl.empty();
@@ -187,30 +202,42 @@ export class MoveToNewFolderModal extends Modal {
     cancelButton.addEventListener("click", () => this.closeWithResult(null));
 
     const moveButton = actionsEl.createEl("button", {
-      text: "Move file",
+      text: this.targetKind === "folder" ? "Move folder" : "Move file",
       cls: "mod-cta",
     });
     moveButton.type = "button";
 
     const updateValidationState = (): FolderNameValidationResult => {
       const validation = validateFolderNameForCurrentPlatform(nameInput.value);
-      validationEl.setText(validation.message);
-      validationEl.toggleClass("is-invalid", !validation.isValid);
-      validationEl.toggleClass("is-valid", validation.isValid);
-      moveButton.disabled = !validation.isValid;
+
+      const shouldShowError = !validation.isValid && (this.hasEditedFolderName || this.hasTriedSubmit);
+      validationEl.toggleClass("is-invalid", shouldShowError);
+      validationEl.setText(shouldShowError && validation.message ? validation.message : "");
       return validation;
     };
 
     nameInput.addEventListener("input", () => {
       this.folderName = nameInput.value;
+      this.hasEditedFolderName = true;
       updateValidationState();
     });
 
+    nameInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        submit();
+      }
+    });
+
     const submit = (): void => {
+      this.hasTriedSubmit = true;
       const value = nameInput.value.trim();
       const validation = validateFolderNameForCurrentPlatform(value);
+      updateValidationState();
       if (!validation.isValid) {
-        new Notice(validation.message);
+        if (validation.message) {
+          new Notice(validation.message);
+        }
         nameInput.focus();
         return;
       }
@@ -225,7 +252,6 @@ export class MoveToNewFolderModal extends Modal {
     moveButton.addEventListener("click", submit);
 
     render();
-    updateValidationState();
     nameInput.focus();
     nameInput.select();
   }

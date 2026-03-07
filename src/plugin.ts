@@ -11,7 +11,11 @@ import {
 } from "obsidian";
 
 import { ConfirmationModal } from "./modals/confirmationModal";
-import { MoveToNewFolderModal, type MoveToNewFolderModalResult } from "./modals/moveToNewFolderModal";
+import {
+  MoveToNewFolderModal,
+  type MoveTargetKind,
+  type MoveToNewFolderModalResult,
+} from "./modals/moveToNewFolderModal";
 import { DEFAULT_SETTINGS, MoveToNewFolderSettingTab, type MoveToNewFolderSettings } from "./settings";
 
 export default class MoveToNewFolderPlugin extends Plugin {
@@ -33,7 +37,24 @@ export default class MoveToNewFolderPlugin extends Plugin {
         }
 
         if (!checking) {
-          void this.runMoveFlow(context.file, context.leaf);
+          void this.runFileMoveFlow(context.file, context.leaf);
+        }
+
+        return true;
+      },
+    });
+
+    this.addCommand({
+      id: "move-folder-to-new-folder",
+      name: "Move folder to new folder...",
+      checkCallback: (checking) => {
+        const folder = this.getActiveFolderContext();
+        if (!folder) {
+          return false;
+        }
+
+        if (!checking) {
+          void this.runFolderMoveFlow(folder);
         }
 
         return true;
@@ -57,26 +78,37 @@ export default class MoveToNewFolderPlugin extends Plugin {
   private registerFileMenuAction(): void {
     this.registerEvent(
       this.app.workspace.on("file-menu", (menu: Menu, file: TAbstractFile, _source: string, leaf?: WorkspaceLeaf) => {
-        if (!this.isMarkdownFile(file)) {
+        if (this.isMarkdownFile(file)) {
+          menu.addItem((item) => {
+            item
+              .setSection(this.moveMenuSection)
+              .setTitle("Move file to new folder...")
+              .setIcon("folder-plus")
+              .onClick(() => {
+                void this.runFileMoveFlow(file, leaf);
+              });
+          });
           return;
         }
 
-        menu.addItem((item) => {
-          item
-            .setSection(this.moveMenuSection)
-            .setTitle("Move file to new folder...")
-            .setIcon("folder-plus")
-            .onClick(() => {
-              void this.runMoveFlow(file, leaf);
-            });
-        });
+        if (file instanceof TFolder && file.path.length > 0) {
+          menu.addItem((item) => {
+            item
+              .setSection(this.moveMenuSection)
+              .setTitle("Move folder to new folder...")
+              .setIcon("folder-plus")
+              .onClick(() => {
+                void this.runFolderMoveFlow(file);
+              });
+          });
+        }
       }),
     );
   }
 
-  private async runMoveFlow(file: TFile, leaf?: WorkspaceLeaf): Promise<void> {
+  private async runFileMoveFlow(file: TFile, leaf?: WorkspaceLeaf): Promise<void> {
     const parentDefaultPath = this.settings.defaultToCurrentParent ? file.parent?.path ?? "" : "";
-    const moveTarget = await this.promptForMoveTarget(parentDefaultPath);
+    const moveTarget = await this.promptForMoveTarget(parentDefaultPath, "file");
     if (moveTarget === null) {
       return;
     }
@@ -115,6 +147,42 @@ export default class MoveToNewFolderPlugin extends Plugin {
     }
 
     new Notice(`Move completed, but could not reopen "${targetFilePath}".`);
+  }
+
+  private async runFolderMoveFlow(folder: TFolder): Promise<void> {
+    const currentParentPath = folder.parent?.path ?? "";
+    const moveTarget = await this.promptForMoveTarget(currentParentPath, "folder");
+    if (moveTarget === null) {
+      return;
+    }
+
+    const targetFolderPath = normalizePath(
+      moveTarget.parentPath.length > 0
+        ? `${moveTarget.parentPath}/${moveTarget.folderName}`
+        : moveTarget.folderName,
+    );
+
+    const targetContainer = await this.ensureTargetFolder(targetFolderPath);
+    if (!targetContainer) {
+      return;
+    }
+
+    const targetChildPath = normalizePath(`${targetContainer.path}/${folder.name}`);
+    const existingDestination = this.app.vault.getAbstractFileByPath(targetChildPath);
+    if (existingDestination && existingDestination.path !== folder.path) {
+      new Notice(`Move canceled: folder already exists at "${targetChildPath}".`);
+      return;
+    }
+
+    try {
+      await this.app.fileManager.renameFile(folder, targetChildPath);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      new Notice(`Could not move folder: ${message}`);
+      return;
+    }
+
+    new Notice(`Moved folder to "${targetFolderPath}".`);
   }
 
   private async ensureTargetFolder(targetFolderPath: string): Promise<TFolder | null> {
@@ -168,9 +236,12 @@ export default class MoveToNewFolderPlugin extends Plugin {
     });
   }
 
-  private async promptForMoveTarget(initialPath: string): Promise<MoveToNewFolderModalResult | null> {
+  private async promptForMoveTarget(
+    initialPath: string,
+    targetKind: MoveTargetKind,
+  ): Promise<MoveToNewFolderModalResult | null> {
     return new Promise((resolve) => {
-      const modal = new MoveToNewFolderModal(this.app, initialPath, (result) => {
+      const modal = new MoveToNewFolderModal(this.app, initialPath, targetKind, (result) => {
         resolve(result);
       });
       modal.open();
@@ -199,5 +270,17 @@ export default class MoveToNewFolderPlugin extends Plugin {
 
   private isMarkdownFile(file: TAbstractFile): file is TFile {
     return file instanceof TFile && file.extension === "md";
+  }
+
+  private getActiveFolderContext(): TFolder | null {
+    const activeFile = this.app.workspace.getActiveFile();
+    if (activeFile?.parent && activeFile.parent.path.length > 0) {
+      return activeFile.parent;
+    }
+
+    const fileExplorer = this.app.workspace.getLeavesOfType("file-explorer")[0]?.view;
+    const navigator = (fileExplorer as { tree?: { focusedItem?: { file?: TAbstractFile } } } | undefined)?.tree;
+    const focusedFile = navigator?.focusedItem?.file;
+    return focusedFile instanceof TFolder && focusedFile.path.length > 0 ? focusedFile : null;
   }
 }
