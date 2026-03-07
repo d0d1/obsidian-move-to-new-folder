@@ -2,7 +2,7 @@
 
 ## Status
 
-This issue is **not fully solved**.
+This issue is not fully solved.
 
 The modal currently contains a straightforward intent to focus the `New folder name` input on open, but Obsidian may still place initial focus on `Filter folders...` at runtime on desktop. The codebase has been reverted to the cleanest known non-hacky version rather than keeping workaround logic that proved brittle.
 
@@ -16,7 +16,7 @@ In the combined `Move file to new folder` modal, the desired behavior was:
 Observed behavior in testing:
 
 - Obsidian frequently moved initial focus to `Filter folders...`
-- some workaround variants placed the caret in `New folder name` but the visual focus highlight appeared with a noticeable flicker/delay
+- some workaround variants placed the caret in `New folder name` but the visual focus highlight appeared with a noticeable flicker or delay
 - one workaround variant removed visible focus from both text inputs and effectively left focus on the folder list instead
 
 ## Why this matters
@@ -27,7 +27,7 @@ This is a polish issue, but it intersects with platform behavior and maintainabi
 - repeated ad hoc focus hacks quickly become fragile
 - the project rules prioritize Obsidian standards first and agent-maintainable code second
 
-That means the correct bar is not “make it seem fixed once on one machine”; it is “use a solution that is technically defensible and likely to remain stable across Obsidian updates.”
+That means the correct bar is not "make it seem fixed once on one machine"; it is "use a solution that is technically defensible and likely to remain stable across Obsidian updates."
 
 ## What was tried
 
@@ -117,12 +117,12 @@ This suggests the bookmark dialog is implemented as a more standard Obsidian mod
 
 ### Likely cause
 
-The likely cause is Obsidian’s own modal/focus lifecycle, not just our explicit focus call.
+The likely cause is Obsidian's own modal/focus lifecycle, not just our explicit focus call.
 
 During investigation, bundled app code suggested Obsidian has a focus-management fallback that can target the first tabbable control in a scoped container. That makes our current layout vulnerable because:
 
 - `Filter folders...` appears before `New folder name` in the DOM
-- if Obsidian’s focus manager runs after our direct focus call, it may override the target
+- if Obsidian's focus manager runs after our direct focus call, it may override the target
 
 This is a plausible explanation for why the filter input repeatedly won focus even when `nameInput.focus()` was called.
 
@@ -148,7 +148,7 @@ If Obsidian overrides that focus, the issue remains documented rather than paper
 
 ## Recommended future path
 
-If this issue becomes worth revisiting, do **not** start by re-trying timing hacks.
+If this issue becomes worth revisiting, do not start by re-trying timing hacks.
 
 Recommended sequence:
 
@@ -163,7 +163,7 @@ Unless there is new evidence, do not re-try these as blind experiments:
 
 - `requestAnimationFrame(...)` focus sequencing as the main fix
 - temporary `tabIndex = -1` removal on the folder filter input
-- mixed timing + `tabIndex` focus workarounds
+- mixed timing plus `tabIndex` focus workarounds
 - CSS-only attempts to fake focus highlight without actually fixing focus ownership
 
 ## Practical conclusion

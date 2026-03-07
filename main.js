@@ -19,42 +19,90 @@ var __copyProps = (to, from, except, desc) => {
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// main.ts
+// src/main.ts
 var main_exports = {};
 __export(main_exports, {
   default: () => MoveToNewFolderPlugin
 });
 module.exports = __toCommonJS(main_exports);
+
+// src/plugin.ts
+var import_obsidian5 = require("obsidian");
+
+// src/modals/confirmationModal.ts
 var import_obsidian = require("obsidian");
-var DEFAULT_SETTINGS = {
-  defaultToCurrentParent: true
+var ConfirmationModal = class extends import_obsidian.Modal {
+  constructor(app, titleText, bodyText, confirmText, onCloseResolve) {
+    super(app);
+    this.didResolve = false;
+    this.titleText = titleText;
+    this.bodyText = bodyText;
+    this.confirmText = confirmText;
+    this.onCloseResolve = onCloseResolve;
+  }
+  onOpen() {
+    const { contentEl } = this;
+    contentEl.empty();
+    this.setTitle(this.titleText);
+    contentEl.createEl("p", { text: this.bodyText });
+    const actionsEl = contentEl.createDiv({ cls: "move-to-new-folder-actions" });
+    const cancelButton = actionsEl.createEl("button", {
+      text: "Cancel",
+      cls: "mod-muted"
+    });
+    cancelButton.type = "button";
+    cancelButton.addEventListener("click", () => this.closeWithResult(false));
+    const confirmButton = actionsEl.createEl("button", {
+      text: this.confirmText,
+      cls: "mod-cta"
+    });
+    confirmButton.type = "button";
+    confirmButton.addEventListener("click", () => this.closeWithResult(true));
+  }
+  onClose() {
+    if (!this.didResolve) {
+      this.onCloseResolve(false);
+    }
+    this.contentEl.empty();
+  }
+  closeWithResult(confirmed) {
+    this.didResolve = true;
+    this.onCloseResolve(confirmed);
+    this.close();
+  }
 };
+
+// src/modals/moveToNewFolderModal.ts
+var import_obsidian3 = require("obsidian");
+
+// src/validation/folderNameValidation.ts
+var import_obsidian2 = require("obsidian");
 function getInvalidFolderCharactersForCurrentPlatform() {
-  if (import_obsidian.Platform.isWin) {
+  if (import_obsidian2.Platform.isWin) {
     return ["\\", "/", ":", "*", "?", '"', "<", ">", "|"];
   }
-  if (import_obsidian.Platform.isAndroidApp) {
+  if (import_obsidian2.Platform.isAndroidApp) {
     return ["\\", "/", ":", "*", "?", "<", ">", '"'];
   }
-  if (import_obsidian.Platform.isMacOS || import_obsidian.Platform.isLinux || import_obsidian.Platform.isIosApp) {
+  if (import_obsidian2.Platform.isMacOS || import_obsidian2.Platform.isLinux || import_obsidian2.Platform.isIosApp) {
     return ["\\", "/", ":"];
   }
   return ["\\", "/", ":"];
 }
 function getCurrentPlatformLabel() {
-  if (import_obsidian.Platform.isWin) {
+  if (import_obsidian2.Platform.isWin) {
     return "Windows";
   }
-  if (import_obsidian.Platform.isAndroidApp) {
+  if (import_obsidian2.Platform.isAndroidApp) {
     return "Android";
   }
-  if (import_obsidian.Platform.isMacOS) {
+  if (import_obsidian2.Platform.isMacOS) {
     return "macOS";
   }
-  if (import_obsidian.Platform.isIosApp) {
+  if (import_obsidian2.Platform.isIosApp) {
     return "iOS/iPadOS";
   }
-  if (import_obsidian.Platform.isLinux) {
+  if (import_obsidian2.Platform.isLinux) {
     return "Linux";
   }
   return "this platform";
@@ -81,7 +129,7 @@ function validateFolderNameForCurrentPlatform(folderName) {
       message: `\u201C${invalidCharacter}\u201D is not allowed on ${getCurrentPlatformLabel()}.`
     };
   }
-  if (import_obsidian.Platform.isWin) {
+  if (import_obsidian2.Platform.isWin) {
     if (trimmedName.endsWith(".") || trimmedName.endsWith(" ")) {
       return {
         isValid: false,
@@ -124,7 +172,9 @@ function validateFolderNameForCurrentPlatform(folderName) {
     message: `Valid on ${getCurrentPlatformLabel()}.`
   };
 }
-var MoveToNewFolderModal = class extends import_obsidian.Modal {
+
+// src/modals/moveToNewFolderModal.ts
+var MoveToNewFolderModal = class extends import_obsidian3.Modal {
   constructor(app, initialPath, onCloseResolve) {
     super(app);
     this.searchValue = "";
@@ -262,12 +312,24 @@ var MoveToNewFolderModal = class extends import_obsidian.Modal {
         submit();
       }
     });
+    const actionsEl = contentEl.createDiv({ cls: "move-to-new-folder-actions" });
+    const cancelButton = actionsEl.createEl("button", {
+      text: "Cancel",
+      cls: "mod-muted"
+    });
+    cancelButton.type = "button";
+    cancelButton.addEventListener("click", () => this.closeWithResult(null));
+    const moveButton = actionsEl.createEl("button", {
+      text: "Move file",
+      cls: "mod-cta"
+    });
+    moveButton.type = "button";
     const updateValidationState = () => {
       const validation = validateFolderNameForCurrentPlatform(nameInput.value);
       validationEl.setText(validation.message);
       validationEl.toggleClass("is-invalid", !validation.isValid);
       validationEl.toggleClass("is-valid", validation.isValid);
-      chooseButton.disabled = !validation.isValid;
+      moveButton.disabled = !validation.isValid;
       return validation;
     };
     nameInput.addEventListener("input", () => {
@@ -278,7 +340,7 @@ var MoveToNewFolderModal = class extends import_obsidian.Modal {
       const value = nameInput.value.trim();
       const validation = validateFolderNameForCurrentPlatform(value);
       if (!validation.isValid) {
-        new import_obsidian.Notice(validation.message);
+        new import_obsidian3.Notice(validation.message);
         nameInput.focus();
         return;
       }
@@ -288,19 +350,7 @@ var MoveToNewFolderModal = class extends import_obsidian.Modal {
         folderName: value
       });
     };
-    const actionsEl = contentEl.createDiv({ cls: "move-to-new-folder-actions" });
-    const cancelButton = actionsEl.createEl("button", {
-      text: "Cancel",
-      cls: "mod-muted"
-    });
-    cancelButton.type = "button";
-    cancelButton.addEventListener("click", () => this.closeWithResult(null));
-    const chooseButton = actionsEl.createEl("button", {
-      text: "Move file",
-      cls: "mod-cta"
-    });
-    chooseButton.type = "button";
-    chooseButton.addEventListener("click", submit);
+    moveButton.addEventListener("click", submit);
     render();
     updateValidationState();
     nameInput.focus();
@@ -316,7 +366,7 @@ var MoveToNewFolderModal = class extends import_obsidian.Modal {
   collectFolderPaths() {
     const folderSet = /* @__PURE__ */ new Set([""]);
     for (const item of this.app.vault.getAllLoadedFiles()) {
-      if (item instanceof import_obsidian.TFolder) {
+      if (item instanceof import_obsidian3.TFolder) {
         folderSet.add(item.path);
       }
     }
@@ -352,47 +402,13 @@ var MoveToNewFolderModal = class extends import_obsidian.Modal {
     this.close();
   }
 };
-var ConfirmationModal = class extends import_obsidian.Modal {
-  constructor(app, titleText, bodyText, confirmText, onCloseResolve) {
-    super(app);
-    this.didResolve = false;
-    this.titleText = titleText;
-    this.bodyText = bodyText;
-    this.confirmText = confirmText;
-    this.onCloseResolve = onCloseResolve;
-  }
-  onOpen() {
-    const { contentEl } = this;
-    contentEl.empty();
-    this.setTitle(this.titleText);
-    contentEl.createEl("p", { text: this.bodyText });
-    const actionsEl = contentEl.createDiv({ cls: "move-to-new-folder-actions" });
-    const cancelButton = actionsEl.createEl("button", {
-      text: "Cancel",
-      cls: "mod-muted"
-    });
-    cancelButton.type = "button";
-    cancelButton.addEventListener("click", () => this.closeWithResult(false));
-    const confirmButton = actionsEl.createEl("button", {
-      text: this.confirmText,
-      cls: "mod-cta"
-    });
-    confirmButton.type = "button";
-    confirmButton.addEventListener("click", () => this.closeWithResult(true));
-  }
-  onClose() {
-    if (!this.didResolve) {
-      this.onCloseResolve(false);
-    }
-    this.contentEl.empty();
-  }
-  closeWithResult(confirmed) {
-    this.didResolve = true;
-    this.onCloseResolve(confirmed);
-    this.close();
-  }
+
+// src/settings.ts
+var import_obsidian4 = require("obsidian");
+var DEFAULT_SETTINGS = {
+  defaultToCurrentParent: true
 };
-var MoveToNewFolderSettingTab = class extends import_obsidian.PluginSettingTab {
+var MoveToNewFolderSettingTab = class extends import_obsidian4.PluginSettingTab {
   constructor(app, plugin) {
     super(app, plugin);
     this.plugin = plugin;
@@ -401,7 +417,7 @@ var MoveToNewFolderSettingTab = class extends import_obsidian.PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
     containerEl.createEl("h2", { text: "Move to New Folder settings" });
-    new import_obsidian.Setting(containerEl).setName("Default parent to current note folder").setDesc("When enabled, the folder picker starts at the current note's parent folder.").addToggle((toggle) => {
+    new import_obsidian4.Setting(containerEl).setName("Default parent to current note folder").setDesc("When enabled, the folder picker starts from the current note's parent folder.").addToggle((toggle) => {
       toggle.setValue(this.plugin.settings.defaultToCurrentParent).onChange(async (value) => {
         this.plugin.settings.defaultToCurrentParent = value;
         await this.plugin.saveSettings();
@@ -409,7 +425,9 @@ var MoveToNewFolderSettingTab = class extends import_obsidian.PluginSettingTab {
     });
   }
 };
-var MoveToNewFolderPlugin = class extends import_obsidian.Plugin {
+
+// src/plugin.ts
+var MoveToNewFolderPlugin = class extends import_obsidian5.Plugin {
   constructor() {
     super(...arguments);
     this.settings = DEFAULT_SETTINGS;
@@ -464,37 +482,37 @@ var MoveToNewFolderPlugin = class extends import_obsidian.Plugin {
     if (moveTarget === null) {
       return;
     }
-    const targetFolderPath = (0, import_obsidian.normalizePath)(
+    const targetFolderPath = (0, import_obsidian5.normalizePath)(
       moveTarget.parentPath.length > 0 ? `${moveTarget.parentPath}/${moveTarget.folderName}` : moveTarget.folderName
     );
     const targetFolder = await this.ensureTargetFolder(targetFolderPath);
     if (!targetFolder) {
       return;
     }
-    const targetFilePath = (0, import_obsidian.normalizePath)(`${targetFolder.path}/${file.name}`);
+    const targetFilePath = (0, import_obsidian5.normalizePath)(`${targetFolder.path}/${file.name}`);
     const existingDestination = this.app.vault.getAbstractFileByPath(targetFilePath);
     if (existingDestination && existingDestination.path !== file.path) {
-      new import_obsidian.Notice(`Move canceled: file already exists at "${targetFilePath}".`);
+      new import_obsidian5.Notice(`Move canceled: file already exists at "${targetFilePath}".`);
       return;
     }
     try {
       await this.app.fileManager.renameFile(file, targetFilePath);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      new import_obsidian.Notice(`Could not move note: ${message}`);
+      new import_obsidian5.Notice(`Could not move note: ${message}`);
       return;
     }
     const movedFile = this.app.vault.getAbstractFileByPath(targetFilePath);
-    if (movedFile instanceof import_obsidian.TFile) {
+    if (movedFile instanceof import_obsidian5.TFile) {
       await this.openMovedFile(movedFile, leaf);
-      new import_obsidian.Notice(`Moved to "${targetFolderPath}".`);
+      new import_obsidian5.Notice(`Moved to "${targetFolderPath}".`);
       return;
     }
-    new import_obsidian.Notice(`Move completed, but could not reopen "${targetFilePath}".`);
+    new import_obsidian5.Notice(`Move completed, but could not reopen "${targetFilePath}".`);
   }
   async ensureTargetFolder(targetFolderPath) {
     const existing = this.app.vault.getAbstractFileByPath(targetFolderPath);
-    if (existing instanceof import_obsidian.TFolder) {
+    if (existing instanceof import_obsidian5.TFolder) {
       const confirmed = await this.confirmReuseFolder(targetFolderPath);
       if (!confirmed) {
         return null;
@@ -502,25 +520,25 @@ var MoveToNewFolderPlugin = class extends import_obsidian.Plugin {
       return existing;
     }
     if (existing) {
-      new import_obsidian.Notice(`Cannot use "${targetFolderPath}": a file already exists at that path.`);
+      new import_obsidian5.Notice(`Cannot use "${targetFolderPath}": a file already exists at that path.`);
       return null;
     }
     try {
       await this.app.vault.createFolder(targetFolderPath);
     } catch (error) {
       const raceWinner = this.app.vault.getAbstractFileByPath(targetFolderPath);
-      if (raceWinner instanceof import_obsidian.TFolder) {
+      if (raceWinner instanceof import_obsidian5.TFolder) {
         return raceWinner;
       }
       const message = error instanceof Error ? error.message : String(error);
-      new import_obsidian.Notice(`Could not create folder: ${message}`);
+      new import_obsidian5.Notice(`Could not create folder: ${message}`);
       return null;
     }
     const created = this.app.vault.getAbstractFileByPath(targetFolderPath);
-    if (created instanceof import_obsidian.TFolder) {
+    if (created instanceof import_obsidian5.TFolder) {
       return created;
     }
-    new import_obsidian.Notice(`Folder creation succeeded but "${targetFolderPath}" is unavailable.`);
+    new import_obsidian5.Notice(`Folder creation succeeded but "${targetFolderPath}" is unavailable.`);
     return null;
   }
   async confirmReuseFolder(folderPath) {
@@ -556,11 +574,11 @@ var MoveToNewFolderPlugin = class extends import_obsidian.Plugin {
     if (!file || file.extension !== "md") {
       return null;
     }
-    const markdownView = this.app.workspace.getActiveViewOfType(import_obsidian.MarkdownView);
+    const markdownView = this.app.workspace.getActiveViewOfType(import_obsidian5.MarkdownView);
     const leaf = (_a = markdownView == null ? void 0 : markdownView.leaf) != null ? _a : this.app.workspace.getMostRecentLeaf();
     return { file, leaf: leaf != null ? leaf : void 0 };
   }
   isMarkdownFile(file) {
-    return file instanceof import_obsidian.TFile && file.extension === "md";
+    return file instanceof import_obsidian5.TFile && file.extension === "md";
   }
 };

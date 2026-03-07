@@ -15,7 +15,7 @@ Then the plugin creates the folder (if needed) and moves the note safely.
 - File explorer context menu action: `Move file to new folder...`
 - File menu support for open note tabs when Obsidian emits `file-menu` for that source
 - Searchable parent-folder picker with keyboard and mouse navigation
-- Separate prompt for the new folder name (no manual full-path typing)
+- Single modal for parent-folder selection and new-folder naming
 - Inline folder-name validation based on the current Obsidian platform
 - Folder conflict handling:
   - If folder exists, prompt to reuse or cancel
@@ -87,7 +87,11 @@ Release assets:
 
 ## Known issue notes
 
-- Initial focus in the move modal is documented in [FOCUS_INVESTIGATION.md](FOCUS_INVESTIGATION.md). Several focus-workaround approaches were tried and intentionally reverted because they were too brittle.
+- Initial focus in the move modal is documented in [docs/investigations/focus.md](docs/investigations/focus.md). Several focus-workaround approaches were tried and intentionally reverted because they were too brittle.
+
+## License
+
+This project is licensed under `GPL-3.0-only`. See [LICENSE](LICENSE).
 
 ## Contributing
 
