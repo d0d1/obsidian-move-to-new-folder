@@ -36,13 +36,14 @@ var ParentFolderPickerModal = class extends import_obsidian.Modal {
     this.selectedIndex = 0;
     this.listByPath = /* @__PURE__ */ new Map();
     this.didResolve = false;
-    this.initialPath = initialPath;
     this.selectedPath = initialPath;
     this.onCloseResolve = onCloseResolve;
     this.folderPaths = this.collectFolderPaths();
     if (!this.folderPaths.includes(this.selectedPath)) {
       this.selectedPath = "";
     }
+    const initialIndex = this.folderPaths.indexOf(this.selectedPath);
+    this.selectedIndex = initialIndex >= 0 ? initialIndex : 0;
   }
   onOpen() {
     const { contentEl } = this;
@@ -73,15 +74,22 @@ var ParentFolderPickerModal = class extends import_obsidian.Modal {
       if (this.selectedIndex >= filtered.length) {
         this.selectedIndex = 0;
       }
-      const selectedByIndex = filtered[this.selectedIndex];
-      this.selectedPath = selectedByIndex;
+      const selectedPathIndex = filtered.indexOf(this.selectedPath);
+      if (selectedPathIndex >= 0) {
+        this.selectedIndex = selectedPathIndex;
+      } else {
+        this.selectedPath = filtered[this.selectedIndex];
+      }
       for (const folderPath of filtered) {
         const button = listEl.createEl("button", {
-          cls: "move-to-new-folder-item",
-          text: folderPath.length > 0 ? folderPath : "/"
+          cls: "move-to-new-folder-item"
         });
         button.type = "button";
         button.dataset.path = folderPath;
+        button.createSpan({
+          cls: "move-to-new-folder-item-label",
+          text: folderPath.length > 0 ? folderPath : "/"
+        });
         if (folderPath === this.selectedPath) {
           button.addClass("is-selected");
         }
@@ -103,7 +111,9 @@ var ParentFolderPickerModal = class extends import_obsidian.Modal {
     };
     searchInput.addEventListener("input", () => {
       this.searchValue = searchInput.value.trim();
-      this.selectedIndex = 0;
+      if (!this.getFilteredFolders().includes(this.selectedPath)) {
+        this.selectedIndex = 0;
+      }
       render();
     });
     searchInput.addEventListener("keydown", (event) => {
@@ -322,14 +332,14 @@ var MoveToNewFolderPlugin = class extends import_obsidian.Plugin {
   constructor() {
     super(...arguments);
     this.settings = DEFAULT_SETTINGS;
-    this.moveMenuSection = "file";
+    this.moveMenuSection = "action";
   }
   async onload() {
     await this.loadSettings();
     this.addSettingTab(new MoveToNewFolderSettingTab(this.app, this));
     this.addCommand({
       id: "move-note-to-new-folder",
-      name: "Move note to new folder",
+      name: "Move file to new folder...",
       checkCallback: (checking) => {
         const context = this.getActiveMarkdownFileContext();
         if (!context) {
@@ -359,7 +369,7 @@ var MoveToNewFolderPlugin = class extends import_obsidian.Plugin {
           return;
         }
         menu.addItem((item) => {
-          item.setSection(this.moveMenuSection).setTitle("Move note to new folder").setIcon("folder-plus").onClick(() => {
+          item.setSection(this.moveMenuSection).setTitle("Move file to new folder...").setIcon("folder-plus").onClick(() => {
             void this.runMoveFlow(file, leaf);
           });
         });

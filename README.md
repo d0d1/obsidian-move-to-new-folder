@@ -11,8 +11,8 @@ Then the plugin creates the folder (if needed) and moves the note safely.
 
 ## Features
 
-- Command palette action: `Move note to new folder`
-- File explorer context menu action: `Move note to new folder`
+- Command palette action: `Move file to new folder...`
+- File explorer context menu action: `Move file to new folder...`
 - File menu support for open note tabs when Obsidian emits `file-menu` for that source
 - Searchable parent-folder picker with keyboard and mouse navigation
 - Separate prompt for the new folder name (no manual full-path typing)
@@ -47,7 +47,7 @@ Then the plugin creates the folder (if needed) and moves the note safely.
 ### From file explorer
 
 1. Right-click a markdown note.
-2. Choose `Move note to new folder`.
+2. Choose `Move file to new folder...`.
 3. Pick a parent folder.
 4. Enter new folder name.
 5. Confirm.
@@ -55,7 +55,7 @@ Then the plugin creates the folder (if needed) and moves the note safely.
 ### From command palette
 
 1. Open the target markdown note.
-2. Run `Move note to new folder`.
+2. Run `Move file to new folder...`.
 3. Complete the same two-step flow.
 
 ## Settings

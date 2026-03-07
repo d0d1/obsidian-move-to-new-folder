@@ -31,7 +31,6 @@ interface TextPromptResult {
 }
 
 class ParentFolderPickerModal extends Modal {
-  private readonly initialPath: string;
   private readonly onCloseResolve: (result: ParentFolderPickerResult) => void;
   private searchValue = "";
   private selectedIndex = 0;
@@ -42,7 +41,6 @@ class ParentFolderPickerModal extends Modal {
 
   constructor(app: App, initialPath: string, onCloseResolve: (result: ParentFolderPickerResult) => void) {
     super(app);
-    this.initialPath = initialPath;
     this.selectedPath = initialPath;
     this.onCloseResolve = onCloseResolve;
     this.folderPaths = this.collectFolderPaths();
@@ -50,6 +48,9 @@ class ParentFolderPickerModal extends Modal {
     if (!this.folderPaths.includes(this.selectedPath)) {
       this.selectedPath = "";
     }
+
+    const initialIndex = this.folderPaths.indexOf(this.selectedPath);
+    this.selectedIndex = initialIndex >= 0 ? initialIndex : 0;
   }
 
   onOpen(): void {
@@ -87,16 +88,23 @@ class ParentFolderPickerModal extends Modal {
         this.selectedIndex = 0;
       }
 
-      const selectedByIndex = filtered[this.selectedIndex];
-      this.selectedPath = selectedByIndex;
+      const selectedPathIndex = filtered.indexOf(this.selectedPath);
+      if (selectedPathIndex >= 0) {
+        this.selectedIndex = selectedPathIndex;
+      } else {
+        this.selectedPath = filtered[this.selectedIndex];
+      }
 
       for (const folderPath of filtered) {
         const button = listEl.createEl("button", {
           cls: "move-to-new-folder-item",
-          text: folderPath.length > 0 ? folderPath : "/",
         });
         button.type = "button";
         button.dataset.path = folderPath;
+        button.createSpan({
+          cls: "move-to-new-folder-item-label",
+          text: folderPath.length > 0 ? folderPath : "/",
+        });
 
         if (folderPath === this.selectedPath) {
           button.addClass("is-selected");
@@ -124,7 +132,9 @@ class ParentFolderPickerModal extends Modal {
 
     searchInput.addEventListener("input", () => {
       this.searchValue = searchInput.value.trim();
-      this.selectedIndex = 0;
+      if (!this.getFilteredFolders().includes(this.selectedPath)) {
+        this.selectedIndex = 0;
+      }
       render();
     });
 
@@ -410,7 +420,7 @@ class MoveToNewFolderSettingTab extends PluginSettingTab {
 
 export default class MoveToNewFolderPlugin extends Plugin {
   settings: MoveToNewFolderSettings = DEFAULT_SETTINGS;
-  private readonly moveMenuSection = "file";
+  private readonly moveMenuSection = "action";
 
   async onload(): Promise<void> {
     await this.loadSettings();
@@ -419,7 +429,7 @@ export default class MoveToNewFolderPlugin extends Plugin {
 
     this.addCommand({
       id: "move-note-to-new-folder",
-      name: "Move note to new folder",
+      name: "Move file to new folder...",
       checkCallback: (checking) => {
         const context = this.getActiveMarkdownFileContext();
         if (!context) {
@@ -458,7 +468,7 @@ export default class MoveToNewFolderPlugin extends Plugin {
         menu.addItem((item) => {
           item
             .setSection(this.moveMenuSection)
-            .setTitle("Move note to new folder")
+            .setTitle("Move file to new folder...")
             .setIcon("folder-plus")
             .onClick(() => {
               void this.runMoveFlow(file, leaf);
