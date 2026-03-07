@@ -38,7 +38,7 @@ export class ConfirmationModal extends Modal {
       cls: "move-to-new-folder-confirmation-text",
     });
 
-    const actionsEl = contentEl.createDiv({ cls: "move-to-new-folder-actions" });
+    const actionsEl = contentEl.createDiv({ cls: "move-to-new-folder-confirmation-actions" });
 
     const backButton = actionsEl.createEl("button", {
       text: this.backText,

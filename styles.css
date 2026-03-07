@@ -180,6 +180,16 @@
   line-height: 1.45;
 }
 
-.move-to-new-folder-confirmation-modal .move-to-new-folder-actions {
+.move-to-new-folder-confirmation-actions {
   margin-top: 0.85rem;
+  display: grid;
+  grid-auto-flow: column;
+  justify-content: end;
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.75rem;
+}
+
+.move-to-new-folder-confirmation-actions > button {
+  margin: 0;
 }

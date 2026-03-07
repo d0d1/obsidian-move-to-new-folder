@@ -49,7 +49,7 @@ var ConfirmationModal = class extends import_obsidian.Modal {
       text: this.bodyText,
       cls: "move-to-new-folder-confirmation-text"
     });
-    const actionsEl = contentEl.createDiv({ cls: "move-to-new-folder-actions" });
+    const actionsEl = contentEl.createDiv({ cls: "move-to-new-folder-confirmation-actions" });
     const backButton = actionsEl.createEl("button", {
       text: this.backText,
       cls: "mod-muted"
