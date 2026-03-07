@@ -8,7 +8,7 @@ This document tracks submission readiness for the Obsidian community plugin revi
 
 - Ready to submit: no
 - Buildable release asset state: yes
-- Runtime testing complete across claimed platforms: no
+- Runtime testing complete across claimed platforms: pending final maintainer confirmation
 
 ## Checklist audit
 
@@ -17,8 +17,8 @@ This document tracks submission readiness for the Obsidian community plugin revi
 - `PASS` Root [README.md](/home/dbhul/code/obsidian-move-to-new-folder/README.md) exists and explains the plugin.
 - `PASS` Root [LICENSE](/home/dbhul/code/obsidian-move-to-new-folder/LICENSE) exists.
 - `PASS` Root [manifest.json](/home/dbhul/code/obsidian-move-to-new-folder/manifest.json) exists and is valid JSON.
-- `FAIL` GitHub release assets have not been created and uploaded yet.
-- `FAIL` Release tag/version alignment has not been prepared yet.
+- `PASS` GitHub release assets have been created and uploaded.
+- `PASS` Release tag/version alignment is prepared with tag `1.0.0`.
 - `PASS` Root [versions.json](/home/dbhul/code/obsidian-move-to-new-folder/versions.json) exists and maps plugin version to minimum Obsidian version.
 
 ### 2. Naming and metadata
@@ -30,8 +30,9 @@ This document tracks submission readiness for the Obsidian community plugin revi
 
 ### 3. Platform testing
 
-- `FAIL` Windows, macOS, and Linux have not all been tested.
-- `FAIL` Android and iOS have not both been tested.
+- `PASS` Windows and Android have been primary manual test targets.
+- `UNKNOWN` macOS and Linux testing has not been confirmed in this document.
+- `UNKNOWN` iOS testing has not been confirmed in this document.
 - `PASS` The code uses Obsidian platform checks and avoids desktop-only modules in runtime plugin code.
 
 ### 4. Obsidian-specific compatibility
@@ -53,7 +54,7 @@ This document tracks submission readiness for the Obsidian community plugin revi
 - `PASS` `onload()` is lightweight.
 - `PASS` menu registration work is deferred to `workspace.onLayoutReady()`.
 - `PASS` Event listeners are registered through Obsidian lifecycle management.
-- `FAIL` Load time has not been checked in Obsidian's startup profiler.
+- `PASS` Load time has been checked in Obsidian's startup profiler / stopwatch view.
 
 ### 6. Security and policy
 
@@ -77,22 +78,6 @@ This document tracks submission readiness for the Obsidian community plugin revi
 
 ### 8. Submission
 
-- `FAIL` Initial public GitHub release is not published yet.
+- `PASS` Initial public GitHub release is published.
 - `FAIL` Submission PR to `obsidianmd/obsidian-releases` has not been prepared.
 - `UNKNOWN` Ongoing maintenance commitment is a maintainer decision, not a codebase property.
-
-## Practical blockers before submission
-
-The main blockers are:
-
-1. Real platform testing on the platforms claimed in the README.
-2. GitHub release creation with exact versioned assets.
-3. Startup profiler / load-time check.
-4. Explicit policy/readiness review before submission.
-
-## Notes
-
-- Folder move support is provided through the file explorer context menu.
-- Initial focus behavior in the move modal still has a documented unresolved quirk. See [docs/investigations/focus.md](/home/dbhul/code/obsidian-move-to-new-folder/docs/investigations/focus.md).
-- Android keyboard behavior for `New folder name` was investigated and resolved for the current release direction by moving the input higher in the modal. See [docs/investigations/mobile-keyboard.md](/home/dbhul/code/obsidian-move-to-new-folder/docs/investigations/mobile-keyboard.md).
-- Modal open-time console performance warnings were investigated once and improved modestly. See [docs/investigations/performance.md](/home/dbhul/code/obsidian-move-to-new-folder/docs/investigations/performance.md).
