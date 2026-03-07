@@ -160,6 +160,10 @@ export class MoveToNewFolderModal extends Modal {
       }
 
       this.refreshSelection(listEl, filtered, scrollBehavior);
+
+      if (scrollBehavior === "initial" && !this.hasRevealedInitialSelection) {
+        this.revealInitialSelection(listEl);
+      }
     };
 
     searchInput.addEventListener("input", () => {
@@ -239,12 +243,7 @@ export class MoveToNewFolderModal extends Modal {
 
     if (Platform.isMobile) {
       const scrollNameFieldIntoView = (): void => {
-        window.setTimeout(() => {
-          nameSectionEl.scrollIntoView({
-            block: "center",
-            inline: "nearest",
-          });
-        }, 125);
+        this.scrollSectionIntoView(contentEl, nameSectionEl);
       };
 
       nameInput.addEventListener("focus", scrollNameFieldIntoView);
@@ -321,11 +320,7 @@ export class MoveToNewFolderModal extends Modal {
       const shouldSelect = path === this.selectedPath;
       button.toggleClass("is-selected", shouldSelect);
       if (shouldSelect) {
-        if (scrollBehavior === "initial" && !this.hasRevealedInitialSelection) {
-          const targetTop = Math.max(button.offsetTop - 8, 0);
-          listEl.scrollTop = targetTop;
-          this.hasRevealedInitialSelection = true;
-        } else if (!this.isElementFullyVisible(listEl, button)) {
+        if (scrollBehavior === "preserve" && !this.isElementFullyVisible(listEl, button)) {
           button.scrollIntoView({ block: "nearest" });
         }
       }
@@ -344,6 +339,36 @@ export class MoveToNewFolderModal extends Modal {
     const visibleTop = containerEl.scrollTop;
     const visibleBottom = visibleTop + containerEl.clientHeight;
     return itemTop >= visibleTop && itemBottom <= visibleBottom;
+  }
+
+  private revealInitialSelection(listEl: HTMLElement): void {
+    const selectedButton = this.listByPath.get(this.selectedPath);
+    if (!selectedButton) {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      const targetTop = Math.max(selectedButton.offsetTop - 8, 0);
+      listEl.scrollTop = targetTop;
+      this.hasRevealedInitialSelection = true;
+    });
+  }
+
+  private scrollSectionIntoView(containerEl: HTMLElement, sectionEl: HTMLElement): void {
+    const scrollSection = (): void => {
+      const containerRect = containerEl.getBoundingClientRect();
+      const sectionRect = sectionEl.getBoundingClientRect();
+      const currentTop = containerEl.scrollTop;
+      const targetTop = Math.max(currentTop + (sectionRect.top - containerRect.top) - 12, 0);
+      containerEl.scrollTo({
+        top: targetTop,
+        behavior: "smooth",
+      });
+    };
+
+    scrollSection();
+    window.setTimeout(scrollSection, 150);
+    window.setTimeout(scrollSection, 300);
   }
 
   private closeWithResult(result: MoveToNewFolderModalResult | null): void {

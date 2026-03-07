@@ -290,6 +290,9 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
         this.listByPath.set(folderPath, button);
       }
       this.refreshSelection(listEl, filtered, scrollBehavior);
+      if (scrollBehavior === "initial" && !this.hasRevealedInitialSelection) {
+        this.revealInitialSelection(listEl);
+      }
     };
     searchInput.addEventListener("input", () => {
       this.searchValue = searchInput.value.trim();
@@ -357,12 +360,7 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
     });
     if (import_obsidian3.Platform.isMobile) {
       const scrollNameFieldIntoView = () => {
-        window.setTimeout(() => {
-          nameSectionEl.scrollIntoView({
-            block: "center",
-            inline: "nearest"
-          });
-        }, 125);
+        this.scrollSectionIntoView(contentEl, nameSectionEl);
       };
       nameInput.addEventListener("focus", scrollNameFieldIntoView);
       nameInput.addEventListener("click", scrollNameFieldIntoView);
@@ -423,11 +421,7 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
       const shouldSelect = path === this.selectedPath;
       button.toggleClass("is-selected", shouldSelect);
       if (shouldSelect) {
-        if (scrollBehavior === "initial" && !this.hasRevealedInitialSelection) {
-          const targetTop = Math.max(button.offsetTop - 8, 0);
-          listEl.scrollTop = targetTop;
-          this.hasRevealedInitialSelection = true;
-        } else if (!this.isElementFullyVisible(listEl, button)) {
+        if (scrollBehavior === "preserve" && !this.isElementFullyVisible(listEl, button)) {
           button.scrollIntoView({ block: "nearest" });
         }
       }
@@ -444,6 +438,32 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
     const visibleTop = containerEl.scrollTop;
     const visibleBottom = visibleTop + containerEl.clientHeight;
     return itemTop >= visibleTop && itemBottom <= visibleBottom;
+  }
+  revealInitialSelection(listEl) {
+    const selectedButton = this.listByPath.get(this.selectedPath);
+    if (!selectedButton) {
+      return;
+    }
+    window.requestAnimationFrame(() => {
+      const targetTop = Math.max(selectedButton.offsetTop - 8, 0);
+      listEl.scrollTop = targetTop;
+      this.hasRevealedInitialSelection = true;
+    });
+  }
+  scrollSectionIntoView(containerEl, sectionEl) {
+    const scrollSection = () => {
+      const containerRect = containerEl.getBoundingClientRect();
+      const sectionRect = sectionEl.getBoundingClientRect();
+      const currentTop = containerEl.scrollTop;
+      const targetTop = Math.max(currentTop + (sectionRect.top - containerRect.top) - 12, 0);
+      containerEl.scrollTo({
+        top: targetTop,
+        behavior: "smooth"
+      });
+    };
+    scrollSection();
+    window.setTimeout(scrollSection, 150);
+    window.setTimeout(scrollSection, 300);
   }
   closeWithResult(result) {
     this.didResolve = true;
