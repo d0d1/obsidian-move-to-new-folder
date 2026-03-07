@@ -39,6 +39,13 @@ Folder moves are supported from the file explorer context menu.
 - Tested primarily on Windows and Android
 - Other supported Obsidian platforms may work but are not fully validated yet
 
+## Install with BRAT
+
+1. Install and enable the BRAT plugin in Obsidian.
+2. In BRAT, choose to add a beta plugin from GitHub.
+3. Enter `d0d1/obsidian-move-to-new-folder`.
+4. Install **Move to New Folder** from BRAT.
+
 ## Manual installation
 
 1. Run `npm install`
@@ -54,16 +61,6 @@ Folder moves are supported from the file explorer context menu.
 - No account requirement
 - No payments or subscriptions
 - No external service dependencies at runtime
-
-## Additional docs
-
-- Release readiness: [docs/release-readiness.md](docs/release-readiness.md)
-- Development standards: [docs/development-standards.md](docs/development-standards.md)
-- Focus investigation history: [docs/investigations/focus.md](docs/investigations/focus.md)
-- Mobile keyboard investigation history: [docs/investigations/mobile-keyboard.md](docs/investigations/mobile-keyboard.md)
-- Performance investigation history: [docs/investigations/performance.md](docs/investigations/performance.md)
-- Contributing: [CONTRIBUTING.md](CONTRIBUTING.md)
-- Agent guidance: [AGENTS.md](AGENTS.md)
 
 ## License
 
