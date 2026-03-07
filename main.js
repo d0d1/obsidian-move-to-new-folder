@@ -50,12 +50,8 @@ var MoveToNewFolderModal = class extends import_obsidian.Modal {
     const { contentEl } = this;
     this.modalEl.addClass("move-to-new-folder-modal");
     contentEl.empty();
-    this.setTitle("Move to New Folder");
+    this.setTitle("Move file to new folder");
     const layoutEl = contentEl.createDiv({ cls: "move-to-new-folder-layout" });
-    layoutEl.createEl("p", {
-      text: "Choose a parent folder, then name the new folder that will hold this file.",
-      cls: "move-to-new-folder-intro"
-    });
     const parentSectionEl = layoutEl.createDiv({ cls: "move-to-new-folder-section" });
     parentSectionEl.createEl("label", {
       text: "Parent folder",
@@ -71,20 +67,12 @@ var MoveToNewFolderModal = class extends import_obsidian.Modal {
     });
     const listEl = parentSectionEl.createDiv({ cls: "move-to-new-folder-list" });
     const nameSectionEl = layoutEl.createDiv({ cls: "move-to-new-folder-section" });
-    nameSectionEl.createEl("label", {
-      text: "New folder name",
-      cls: "move-to-new-folder-label"
-    });
     const nameInput = nameSectionEl.createEl("input", {
       type: "text",
       placeholder: "New folder name",
       cls: "move-to-new-folder-text-input"
     });
     nameInput.value = this.folderName;
-    const hintEl = nameSectionEl.createDiv({
-      text: "Enter only a folder name, not a full path.",
-      cls: "move-to-new-folder-hint"
-    });
     const updateSelectedParent = () => {
       selectedParentEl.empty();
       selectedParentEl.createSpan({
@@ -95,9 +83,9 @@ var MoveToNewFolderModal = class extends import_obsidian.Modal {
     const render = () => {
       listEl.empty();
       this.listByPath.clear();
-      updateSelectedParent();
       const filtered = this.getFilteredFolders();
       if (filtered.length === 0) {
+        updateSelectedParent();
         listEl.createDiv({
           text: "No folders match your search.",
           cls: "move-to-new-folder-empty"
@@ -113,6 +101,7 @@ var MoveToNewFolderModal = class extends import_obsidian.Modal {
       } else {
         this.selectedPath = filtered[this.selectedIndex];
       }
+      updateSelectedParent();
       for (const folderPath of filtered) {
         const button = listEl.createEl("button", {
           cls: "move-to-new-folder-item"
@@ -124,10 +113,6 @@ var MoveToNewFolderModal = class extends import_obsidian.Modal {
           cls: "move-to-new-folder-item-label",
           text: folderPath.length > 0 ? folderPath : "/"
         });
-        rowEl.createSpan({
-          cls: "move-to-new-folder-item-badge",
-          text: "Selected"
-        });
         if (folderPath === this.selectedPath) {
           button.addClass("is-selected");
         }
@@ -136,12 +121,10 @@ var MoveToNewFolderModal = class extends import_obsidian.Modal {
           render();
         });
         button.addEventListener("mouseenter", () => {
-          const idx = filtered.indexOf(folderPath);
-          if (idx >= 0) {
-            this.selectedIndex = idx;
-            this.selectedPath = folderPath;
-            this.refreshSelection(listEl, filtered);
-          }
+          button.addClass("is-hovered");
+        });
+        button.addEventListener("mouseleave", () => {
+          button.removeClass("is-hovered");
         });
         this.listByPath.set(folderPath, button);
       }
@@ -183,7 +166,6 @@ var MoveToNewFolderModal = class extends import_obsidian.Modal {
     });
     nameInput.addEventListener("input", () => {
       this.folderName = nameInput.value;
-      hintEl.setText("Enter only a folder name, not a full path.");
     });
     const submit = () => {
       const value = nameInput.value.trim();
@@ -193,7 +175,7 @@ var MoveToNewFolderModal = class extends import_obsidian.Modal {
         return;
       }
       if (value.includes("/") || value.includes("\\")) {
-        hintEl.setText("Folder name cannot contain path separators.");
+        new import_obsidian.Notice("Folder name cannot contain path separators.");
         nameInput.focus();
         return;
       }

@@ -9,13 +9,7 @@
 .move-to-new-folder-modal .move-to-new-folder-layout {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-}
-
-.move-to-new-folder-modal .move-to-new-folder-intro {
-  margin: 0;
-  color: var(--text-muted);
-  line-height: 1.4;
+  gap: 0.9rem;
 }
 
 .move-to-new-folder-modal .move-to-new-folder-hint {
@@ -43,11 +37,11 @@
 .move-to-new-folder-modal .move-to-new-folder-parent-path {
   display: flex;
   align-items: center;
-  padding: 0.65rem 0.8rem;
-  border: 1px solid var(--background-modifier-border);
+  padding: 0.75rem 0.8rem;
+  border: 1px dashed var(--background-modifier-border);
   border-radius: var(--radius-m);
-  background: var(--background-secondary);
-  color: var(--text-normal);
+  background: color-mix(in srgb, var(--background-secondary) 72%, transparent);
+  color: var(--text-muted);
   overflow-x: auto;
   white-space: nowrap;
 }
@@ -55,6 +49,8 @@
 .move-to-new-folder-modal .move-to-new-folder-parent-badge {
   display: inline-block;
   min-width: 0;
+  font-family: var(--font-monospace);
+  font-size: var(--font-ui-small);
 }
 
 .move-to-new-folder-modal .move-to-new-folder-text-input {
@@ -97,28 +93,17 @@
   display: inline-block;
 }
 
-.move-to-new-folder-modal .move-to-new-folder-item-badge {
-  display: none;
-  flex: 0 0 auto;
-  padding: 0.1rem 0.45rem;
-  border-radius: 999px;
-  background: var(--interactive-accent);
-  color: var(--text-on-accent);
-  font-size: var(--font-ui-smaller);
-  font-weight: var(--font-medium);
+.move-to-new-folder-modal .move-to-new-folder-item:hover {
+  background: var(--background-modifier-hover);
 }
 
-.move-to-new-folder-modal .move-to-new-folder-item:hover {
+.move-to-new-folder-modal .move-to-new-folder-item.is-hovered:not(.is-selected) {
   background: var(--background-modifier-hover);
 }
 
 .move-to-new-folder-modal .move-to-new-folder-item.is-selected {
   background: color-mix(in srgb, var(--interactive-accent) 14%, var(--background-secondary));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--interactive-accent) 55%, transparent);
-}
-
-.move-to-new-folder-modal .move-to-new-folder-item.is-selected .move-to-new-folder-item-badge {
-  display: inline-flex;
 }
 
 .move-to-new-folder-modal .move-to-new-folder-empty {

@@ -84,6 +84,10 @@ Release assets:
 - No payments/subscriptions
 - No external service dependencies at runtime
 
+## Known issue notes
+
+- Initial focus in the move modal is documented in [FOCUS_INVESTIGATION.md](FOCUS_INVESTIGATION.md). Several focus-workaround approaches were tried and intentionally reverted because they were too brittle.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md).

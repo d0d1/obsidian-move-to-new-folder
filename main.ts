@@ -55,14 +55,9 @@ class MoveToNewFolderModal extends Modal {
     const { contentEl } = this;
     this.modalEl.addClass("move-to-new-folder-modal");
     contentEl.empty();
-    this.setTitle("Move to New Folder");
+    this.setTitle("Move file to new folder");
 
     const layoutEl = contentEl.createDiv({ cls: "move-to-new-folder-layout" });
-
-    layoutEl.createEl("p", {
-      text: "Choose a parent folder, then name the new folder that will hold this file.",
-      cls: "move-to-new-folder-intro",
-    });
 
     const parentSectionEl = layoutEl.createDiv({ cls: "move-to-new-folder-section" });
     parentSectionEl.createEl("label", {
@@ -82,10 +77,6 @@ class MoveToNewFolderModal extends Modal {
     const listEl = parentSectionEl.createDiv({ cls: "move-to-new-folder-list" });
 
     const nameSectionEl = layoutEl.createDiv({ cls: "move-to-new-folder-section" });
-    nameSectionEl.createEl("label", {
-      text: "New folder name",
-      cls: "move-to-new-folder-label",
-    });
 
     const nameInput = nameSectionEl.createEl("input", {
       type: "text",
@@ -93,11 +84,6 @@ class MoveToNewFolderModal extends Modal {
       cls: "move-to-new-folder-text-input",
     });
     nameInput.value = this.folderName;
-
-    const hintEl = nameSectionEl.createDiv({
-      text: "Enter only a folder name, not a full path.",
-      cls: "move-to-new-folder-hint",
-    });
 
     const updateSelectedParent = (): void => {
       selectedParentEl.empty();
@@ -110,10 +96,10 @@ class MoveToNewFolderModal extends Modal {
     const render = (): void => {
       listEl.empty();
       this.listByPath.clear();
-      updateSelectedParent();
 
       const filtered = this.getFilteredFolders();
       if (filtered.length === 0) {
+        updateSelectedParent();
         listEl.createDiv({
           text: "No folders match your search.",
           cls: "move-to-new-folder-empty",
@@ -132,6 +118,8 @@ class MoveToNewFolderModal extends Modal {
         this.selectedPath = filtered[this.selectedIndex];
       }
 
+      updateSelectedParent();
+
       for (const folderPath of filtered) {
         const button = listEl.createEl("button", {
           cls: "move-to-new-folder-item",
@@ -144,10 +132,6 @@ class MoveToNewFolderModal extends Modal {
           cls: "move-to-new-folder-item-label",
           text: folderPath.length > 0 ? folderPath : "/",
         });
-        rowEl.createSpan({
-          cls: "move-to-new-folder-item-badge",
-          text: "Selected",
-        });
 
         if (folderPath === this.selectedPath) {
           button.addClass("is-selected");
@@ -159,12 +143,11 @@ class MoveToNewFolderModal extends Modal {
         });
 
         button.addEventListener("mouseenter", () => {
-          const idx = filtered.indexOf(folderPath);
-          if (idx >= 0) {
-            this.selectedIndex = idx;
-            this.selectedPath = folderPath;
-            this.refreshSelection(listEl, filtered);
-          }
+          button.addClass("is-hovered");
+        });
+
+        button.addEventListener("mouseleave", () => {
+          button.removeClass("is-hovered");
         });
 
         this.listByPath.set(folderPath, button);
@@ -214,7 +197,6 @@ class MoveToNewFolderModal extends Modal {
 
     nameInput.addEventListener("input", () => {
       this.folderName = nameInput.value;
-      hintEl.setText("Enter only a folder name, not a full path.");
     });
 
     const submit = (): void => {
@@ -226,7 +208,7 @@ class MoveToNewFolderModal extends Modal {
       }
 
       if (value.includes("/") || value.includes("\\")) {
-        hintEl.setText("Folder name cannot contain path separators.");
+        new Notice("Folder name cannot contain path separators.");
         nameInput.focus();
         return;
       }
