@@ -1,6 +1,6 @@
 {
   "name": "move-to-new-folder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Obsidian plugin for a better move-to-new-folder workflow",
   "main": "main.js",
   "scripts": {
