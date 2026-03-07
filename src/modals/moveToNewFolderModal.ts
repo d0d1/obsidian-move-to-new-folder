@@ -60,6 +60,7 @@ export class MoveToNewFolderModal extends Modal {
       cls: "move-to-new-folder-text-input",
     });
     nameInput.value = this.folderName;
+    nameInput.enterKeyHint = "done";
     const validationEl = nameSectionEl.createDiv({
       cls: "move-to-new-folder-validation",
     });
@@ -81,6 +82,9 @@ export class MoveToNewFolderModal extends Modal {
       placeholder: "Filter folders...",
       cls: "move-to-new-folder-search",
     });
+    if (Platform.isMobile) {
+      searchInput.tabIndex = -1;
+    }
     const listEl = parentSectionEl.createDiv({ cls: "move-to-new-folder-list" });
 
     const updateSelectedParent = (): void => {
