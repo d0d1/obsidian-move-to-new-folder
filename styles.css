@@ -2,25 +2,36 @@
   width: min(640px, 92vw);
 }
 
+.move-to-new-folder-modal .modal-content {
+  padding-top: 0.25rem;
+}
+
+.move-to-new-folder-modal .move-to-new-folder-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.move-to-new-folder-modal .move-to-new-folder-intro {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
 .move-to-new-folder-modal .move-to-new-folder-hint {
   color: var(--text-muted);
   margin: 0;
+  line-height: 1.35;
 }
 
 .move-to-new-folder-modal .move-to-new-folder-search {
-  margin-bottom: 0.75rem;
-}
-
-.move-to-new-folder-modal .move-to-new-folder-step {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  width: 100%;
 }
 
 .move-to-new-folder-modal .move-to-new-folder-section {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.6rem;
 }
 
 .move-to-new-folder-modal .move-to-new-folder-label {
@@ -30,6 +41,8 @@
 }
 
 .move-to-new-folder-modal .move-to-new-folder-parent-path {
+  display: flex;
+  align-items: center;
   padding: 0.65rem 0.8rem;
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--radius-m);
@@ -39,17 +52,23 @@
   white-space: nowrap;
 }
 
+.move-to-new-folder-modal .move-to-new-folder-parent-badge {
+  display: inline-block;
+  min-width: 0;
+}
+
 .move-to-new-folder-modal .move-to-new-folder-text-input {
   width: 100%;
 }
 
 .move-to-new-folder-modal .move-to-new-folder-list {
-  max-height: 320px;
+  max-height: 260px;
   overflow-y: auto;
   overflow-x: auto;
   border: 1px solid var(--background-modifier-border);
-  border-radius: var(--radius-s);
+  border-radius: var(--radius-m);
   padding: 0.25rem;
+  background: var(--background-primary-alt);
 }
 
 .move-to-new-folder-modal .move-to-new-folder-item {
@@ -62,27 +81,53 @@
   border: 0;
   background: transparent;
   color: var(--text-normal);
-  border-radius: var(--radius-s);
-  padding: 0.35rem 0.45rem;
+  border-radius: calc(var(--radius-m) - 2px);
+  padding: 0.5rem 0.65rem;
   cursor: pointer;
+}
+
+.move-to-new-folder-modal .move-to-new-folder-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
 .move-to-new-folder-modal .move-to-new-folder-item-label {
   display: inline-block;
 }
 
-.move-to-new-folder-modal .move-to-new-folder-item:hover,
-.move-to-new-folder-modal .move-to-new-folder-item.is-selected {
+.move-to-new-folder-modal .move-to-new-folder-item-badge {
+  display: none;
+  flex: 0 0 auto;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  font-size: var(--font-ui-smaller);
+  font-weight: var(--font-medium);
+}
+
+.move-to-new-folder-modal .move-to-new-folder-item:hover {
   background: var(--background-modifier-hover);
+}
+
+.move-to-new-folder-modal .move-to-new-folder-item.is-selected {
+  background: color-mix(in srgb, var(--interactive-accent) 14%, var(--background-secondary));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--interactive-accent) 55%, transparent);
+}
+
+.move-to-new-folder-modal .move-to-new-folder-item.is-selected .move-to-new-folder-item-badge {
+  display: inline-flex;
 }
 
 .move-to-new-folder-modal .move-to-new-folder-empty {
   color: var(--text-muted);
-  padding: 0.5rem;
+  padding: 0.75rem;
 }
 
 .move-to-new-folder-modal .move-to-new-folder-actions {
-  margin-top: 1rem;
+  margin-top: 0.5rem;
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;

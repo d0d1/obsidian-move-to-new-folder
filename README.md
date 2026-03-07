@@ -2,10 +2,10 @@
 
 `Move to New Folder` is an Obsidian community plugin that improves the workflow for moving a note into a newly created folder.
 
-Instead of typing a full destination path in one step, it uses a fast two-step flow:
+Instead of typing a full destination path manually, it uses a single focused modal:
 
 1. Choose an existing parent folder from a searchable picker.
-2. Enter the new child folder name.
+2. Enter the new child folder name in the same dialog.
 
 Then the plugin creates the folder (if needed) and moves the note safely.
 
@@ -49,14 +49,14 @@ Then the plugin creates the folder (if needed) and moves the note safely.
 1. Right-click a markdown note.
 2. Choose `Move file to new folder...`.
 3. Pick a parent folder.
-4. Enter new folder name.
+4. Enter the new folder name.
 5. Confirm.
 
 ### From command palette
 
 1. Open the target markdown note.
 2. Run `Move file to new folder...`.
-3. Complete the same two-step flow.
+3. Complete the same modal flow.
 
 ## Settings
 

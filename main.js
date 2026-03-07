@@ -29,11 +29,12 @@ var import_obsidian = require("obsidian");
 var DEFAULT_SETTINGS = {
   defaultToCurrentParent: true
 };
-var ParentFolderPickerModal = class extends import_obsidian.Modal {
+var MoveToNewFolderModal = class extends import_obsidian.Modal {
   constructor(app, initialPath, onCloseResolve) {
     super(app);
     this.searchValue = "";
     this.selectedIndex = 0;
+    this.folderName = "";
     this.listByPath = /* @__PURE__ */ new Map();
     this.didResolve = false;
     this.selectedPath = initialPath;
@@ -49,20 +50,52 @@ var ParentFolderPickerModal = class extends import_obsidian.Modal {
     const { contentEl } = this;
     this.modalEl.addClass("move-to-new-folder-modal");
     contentEl.empty();
-    this.setTitle("Choose a parent folder");
-    contentEl.createEl("p", {
-      text: "Search by typing or pick a folder from the list.",
-      cls: "move-to-new-folder-hint"
+    this.setTitle("Move to New Folder");
+    const layoutEl = contentEl.createDiv({ cls: "move-to-new-folder-layout" });
+    layoutEl.createEl("p", {
+      text: "Choose a parent folder, then name the new folder that will hold this file.",
+      cls: "move-to-new-folder-intro"
     });
-    const searchInput = contentEl.createEl("input", {
+    const parentSectionEl = layoutEl.createDiv({ cls: "move-to-new-folder-section" });
+    parentSectionEl.createEl("label", {
+      text: "Parent folder",
+      cls: "move-to-new-folder-label"
+    });
+    const selectedParentEl = parentSectionEl.createDiv({
+      cls: "move-to-new-folder-parent-path"
+    });
+    const searchInput = parentSectionEl.createEl("input", {
       type: "text",
-      placeholder: "Search folders...",
+      placeholder: "Filter folders...",
       cls: "move-to-new-folder-search"
     });
-    const listEl = contentEl.createDiv({ cls: "move-to-new-folder-list" });
+    const listEl = parentSectionEl.createDiv({ cls: "move-to-new-folder-list" });
+    const nameSectionEl = layoutEl.createDiv({ cls: "move-to-new-folder-section" });
+    nameSectionEl.createEl("label", {
+      text: "New folder name",
+      cls: "move-to-new-folder-label"
+    });
+    const nameInput = nameSectionEl.createEl("input", {
+      type: "text",
+      placeholder: "New folder name",
+      cls: "move-to-new-folder-text-input"
+    });
+    nameInput.value = this.folderName;
+    const hintEl = nameSectionEl.createDiv({
+      text: "Enter only a folder name, not a full path.",
+      cls: "move-to-new-folder-hint"
+    });
+    const updateSelectedParent = () => {
+      selectedParentEl.empty();
+      selectedParentEl.createSpan({
+        cls: "move-to-new-folder-parent-badge",
+        text: this.selectedPath.length > 0 ? this.selectedPath : "/"
+      });
+    };
     const render = () => {
       listEl.empty();
       this.listByPath.clear();
+      updateSelectedParent();
       const filtered = this.getFilteredFolders();
       if (filtered.length === 0) {
         listEl.createDiv({
@@ -86,16 +119,21 @@ var ParentFolderPickerModal = class extends import_obsidian.Modal {
         });
         button.type = "button";
         button.dataset.path = folderPath;
-        button.createSpan({
+        const rowEl = button.createDiv({ cls: "move-to-new-folder-item-row" });
+        rowEl.createSpan({
           cls: "move-to-new-folder-item-label",
           text: folderPath.length > 0 ? folderPath : "/"
+        });
+        rowEl.createSpan({
+          cls: "move-to-new-folder-item-badge",
+          text: "Selected"
         });
         if (folderPath === this.selectedPath) {
           button.addClass("is-selected");
         }
         button.addEventListener("click", () => {
           this.selectedPath = folderPath;
-          this.closeWithResult(folderPath);
+          render();
         });
         button.addEventListener("mouseenter", () => {
           const idx = filtered.indexOf(folderPath);
@@ -111,8 +149,12 @@ var ParentFolderPickerModal = class extends import_obsidian.Modal {
     };
     searchInput.addEventListener("input", () => {
       this.searchValue = searchInput.value.trim();
-      if (!this.getFilteredFolders().includes(this.selectedPath)) {
+      const filtered = this.getFilteredFolders();
+      if (!filtered.includes(this.selectedPath)) {
         this.selectedIndex = 0;
+        if (filtered.length > 0) {
+          this.selectedPath = filtered[0];
+        }
       }
       render();
     });
@@ -136,11 +178,31 @@ var ParentFolderPickerModal = class extends import_obsidian.Modal {
       }
       if (event.key === "Enter") {
         event.preventDefault();
-        if (filtered.length > 0) {
-          this.closeWithResult(filtered[this.selectedIndex]);
-        }
+        submit();
       }
     });
+    nameInput.addEventListener("input", () => {
+      this.folderName = nameInput.value;
+      hintEl.setText("Enter only a folder name, not a full path.");
+    });
+    const submit = () => {
+      const value = nameInput.value.trim();
+      if (!value) {
+        new import_obsidian.Notice("Folder name cannot be empty.");
+        nameInput.focus();
+        return;
+      }
+      if (value.includes("/") || value.includes("\\")) {
+        hintEl.setText("Folder name cannot contain path separators.");
+        nameInput.focus();
+        return;
+      }
+      this.folderName = value;
+      this.closeWithResult({
+        parentPath: this.selectedPath,
+        folderName: value
+      });
+    };
     const actionsEl = contentEl.createDiv({ cls: "move-to-new-folder-actions" });
     const cancelButton = actionsEl.createEl("button", {
       text: "Cancel",
@@ -149,18 +211,18 @@ var ParentFolderPickerModal = class extends import_obsidian.Modal {
     cancelButton.type = "button";
     cancelButton.addEventListener("click", () => this.closeWithResult(null));
     const chooseButton = actionsEl.createEl("button", {
-      text: "Choose",
+      text: "Move file",
       cls: "mod-cta"
     });
     chooseButton.type = "button";
-    chooseButton.addEventListener("click", () => this.closeWithResult(this.selectedPath));
+    chooseButton.addEventListener("click", submit);
     render();
-    searchInput.focus();
-    searchInput.select();
+    nameInput.focus();
+    nameInput.select();
   }
   onClose() {
     if (!this.didResolve) {
-      this.onCloseResolve({ selectedPath: null });
+      this.onCloseResolve(null);
     }
     this.modalEl.removeClass("move-to-new-folder-modal");
     this.contentEl.empty();
@@ -198,97 +260,9 @@ var ParentFolderPickerModal = class extends import_obsidian.Modal {
       this.refreshSelection(listEl, filtered);
     }
   }
-  closeWithResult(selectedPath) {
+  closeWithResult(result) {
     this.didResolve = true;
-    this.onCloseResolve({ selectedPath });
-    this.close();
-  }
-};
-var TextPromptModal = class extends import_obsidian.Modal {
-  constructor(app, placeholder, submitText, parentFolderPath, onCloseResolve) {
-    super(app);
-    this.didResolve = false;
-    this.placeholder = placeholder;
-    this.submitText = submitText;
-    this.parentFolderPath = parentFolderPath;
-    this.onCloseResolve = onCloseResolve;
-  }
-  onOpen() {
-    const { contentEl } = this;
-    contentEl.empty();
-    this.setTitle("Create a new folder");
-    const layoutEl = contentEl.createDiv({ cls: "move-to-new-folder-step" });
-    const parentSectionEl = layoutEl.createDiv({ cls: "move-to-new-folder-section" });
-    parentSectionEl.createEl("div", {
-      text: "Selected parent folder",
-      cls: "move-to-new-folder-label"
-    });
-    parentSectionEl.createEl("div", {
-      text: this.parentFolderPath.length > 0 ? this.parentFolderPath : "/",
-      cls: "move-to-new-folder-parent-path"
-    });
-    const inputSectionEl = layoutEl.createDiv({ cls: "move-to-new-folder-section" });
-    inputSectionEl.createEl("label", {
-      text: "New folder name",
-      cls: "move-to-new-folder-label"
-    });
-    const input = inputSectionEl.createEl("input", {
-      type: "text",
-      placeholder: this.placeholder,
-      cls: "move-to-new-folder-text-input"
-    });
-    const hintEl = inputSectionEl.createDiv({
-      text: "Enter only a folder name, not a full path.",
-      cls: "move-to-new-folder-hint"
-    });
-    const actionsEl = contentEl.createDiv({ cls: "move-to-new-folder-actions" });
-    const backButton = actionsEl.createEl("button", {
-      text: "Back"
-    });
-    backButton.type = "button";
-    backButton.addEventListener("click", () => this.closeWithResult("back", null));
-    const cancelButton = actionsEl.createEl("button", {
-      text: "Cancel",
-      cls: "mod-muted"
-    });
-    cancelButton.type = "button";
-    cancelButton.addEventListener("click", () => this.closeWithResult("cancel", null));
-    const submitButton = actionsEl.createEl("button", {
-      text: this.submitText,
-      cls: "mod-cta"
-    });
-    submitButton.type = "button";
-    const submit = () => {
-      const value = input.value.trim();
-      if (!value) {
-        new import_obsidian.Notice("Folder name cannot be empty.");
-        return;
-      }
-      if (value.includes("/") || value.includes("\\")) {
-        hintEl.setText("Folder name cannot contain path separators.");
-        return;
-      }
-      this.closeWithResult("submit", value);
-    };
-    submitButton.addEventListener("click", submit);
-    input.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        submit();
-      }
-    });
-    input.focus();
-    input.select();
-  }
-  onClose() {
-    if (!this.didResolve) {
-      this.onCloseResolve({ action: "cancel", value: null });
-    }
-    this.contentEl.empty();
-  }
-  closeWithResult(action, value) {
-    this.didResolve = true;
-    this.onCloseResolve({ action, value });
+    this.onCloseResolve(result);
     this.close();
   }
 };
@@ -399,29 +373,13 @@ var MoveToNewFolderPlugin = class extends import_obsidian.Plugin {
   }
   async runMoveFlow(file, leaf) {
     var _a, _b;
-    let selectedParentPath = this.settings.defaultToCurrentParent ? (_b = (_a = file.parent) == null ? void 0 : _a.path) != null ? _b : "" : "";
-    let newFolderName = null;
-    while (true) {
-      const pickedParent = await this.pickParentFolder(selectedParentPath);
-      if (pickedParent === null) {
-        return;
-      }
-      selectedParentPath = pickedParent;
-      const folderPromptResult = await this.promptForFolderName(selectedParentPath);
-      if (folderPromptResult.action === "cancel") {
-        return;
-      }
-      if (folderPromptResult.action === "back") {
-        continue;
-      }
-      newFolderName = folderPromptResult.value;
-      break;
-    }
-    if (newFolderName === null) {
+    const parentDefaultPath = this.settings.defaultToCurrentParent ? (_b = (_a = file.parent) == null ? void 0 : _a.path) != null ? _b : "" : "";
+    const moveTarget = await this.promptForMoveTarget(parentDefaultPath);
+    if (moveTarget === null) {
       return;
     }
     const targetFolderPath = (0, import_obsidian.normalizePath)(
-      selectedParentPath.length > 0 ? `${selectedParentPath}/${newFolderName}` : newFolderName
+      moveTarget.parentPath.length > 0 ? `${moveTarget.parentPath}/${moveTarget.folderName}` : moveTarget.folderName
     );
     const targetFolder = await this.ensureTargetFolder(targetFolderPath);
     if (!targetFolder) {
@@ -491,25 +449,11 @@ var MoveToNewFolderPlugin = class extends import_obsidian.Plugin {
       modal.open();
     });
   }
-  async pickParentFolder(initialPath) {
+  async promptForMoveTarget(initialPath) {
     return new Promise((resolve) => {
-      const modal = new ParentFolderPickerModal(this.app, initialPath, (result) => {
-        resolve(result.selectedPath);
+      const modal = new MoveToNewFolderModal(this.app, initialPath, (result) => {
+        resolve(result);
       });
-      modal.open();
-    });
-  }
-  async promptForFolderName(parentFolderPath) {
-    return new Promise((resolve) => {
-      const modal = new TextPromptModal(
-        this.app,
-        "New folder name",
-        "Continue",
-        parentFolderPath,
-        (result) => {
-          resolve(result);
-        }
-      );
       modal.open();
     });
   }
