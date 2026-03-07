@@ -45,6 +45,9 @@ export class MoveToNewFolderModal extends Modal {
   onOpen(): void {
     const { contentEl } = this;
     this.modalEl.addClass("move-to-new-folder-modal");
+    if (Platform.isMobile) {
+      this.modalEl.addClass("move-to-new-folder-modal-mobile");
+    }
     contentEl.empty();
     this.setTitle(this.targetKind === "folder" ? "Move folder to new folder" : "Move file to new folder");
 
@@ -233,6 +236,20 @@ export class MoveToNewFolderModal extends Modal {
       }
     });
 
+    if (Platform.isMobile) {
+      const scrollNameFieldIntoView = (): void => {
+        window.setTimeout(() => {
+          nameSectionEl.scrollIntoView({
+            block: "center",
+            inline: "nearest",
+          });
+        }, 125);
+      };
+
+      nameInput.addEventListener("focus", scrollNameFieldIntoView);
+      nameInput.addEventListener("click", scrollNameFieldIntoView);
+    }
+
     const submit = (): void => {
       this.hasTriedSubmit = true;
       const value = nameInput.value.trim();
@@ -266,7 +283,7 @@ export class MoveToNewFolderModal extends Modal {
     if (!this.didResolve) {
       this.onCloseResolve(null);
     }
-    this.modalEl.removeClass("move-to-new-folder-modal");
+    this.modalEl.removeClass("move-to-new-folder-modal", "move-to-new-folder-modal-mobile");
     this.contentEl.empty();
   }
 

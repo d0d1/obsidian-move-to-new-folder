@@ -6,6 +6,13 @@
   padding-top: 0.25rem;
 }
 
+.move-to-new-folder-modal.move-to-new-folder-modal-mobile .modal-content {
+  max-height: min(78vh, 720px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
 .move-to-new-folder-modal .move-to-new-folder-layout {
   display: flex;
   flex-direction: column;
@@ -86,6 +93,10 @@
   background: var(--background-primary-alt);
 }
 
+.move-to-new-folder-modal.move-to-new-folder-modal-mobile .move-to-new-folder-list {
+  max-height: min(32vh, 220px);
+}
+
 .move-to-new-folder-modal .move-to-new-folder-item {
   display: block;
   width: max-content;
@@ -135,4 +146,8 @@
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
+}
+
+.move-to-new-folder-modal.move-to-new-folder-modal-mobile .move-to-new-folder-actions {
+  padding-bottom: 0.25rem;
 }

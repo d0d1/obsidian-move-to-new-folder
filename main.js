@@ -195,6 +195,9 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
   onOpen() {
     const { contentEl } = this;
     this.modalEl.addClass("move-to-new-folder-modal");
+    if (import_obsidian3.Platform.isMobile) {
+      this.modalEl.addClass("move-to-new-folder-modal-mobile");
+    }
     contentEl.empty();
     this.setTitle(this.targetKind === "folder" ? "Move folder to new folder" : "Move file to new folder");
     const layoutEl = contentEl.createDiv({ cls: "move-to-new-folder-layout" });
@@ -351,6 +354,18 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
         submit();
       }
     });
+    if (import_obsidian3.Platform.isMobile) {
+      const scrollNameFieldIntoView = () => {
+        window.setTimeout(() => {
+          nameSectionEl.scrollIntoView({
+            block: "center",
+            inline: "nearest"
+          });
+        }, 125);
+      };
+      nameInput.addEventListener("focus", scrollNameFieldIntoView);
+      nameInput.addEventListener("click", scrollNameFieldIntoView);
+    }
     const submit = () => {
       this.hasTriedSubmit = true;
       const value = nameInput.value.trim();
@@ -380,7 +395,7 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
     if (!this.didResolve) {
       this.onCloseResolve(null);
     }
-    this.modalEl.removeClass("move-to-new-folder-modal");
+    this.modalEl.removeClass("move-to-new-folder-modal", "move-to-new-folder-modal-mobile");
     this.contentEl.empty();
   }
   collectFolderPaths() {
