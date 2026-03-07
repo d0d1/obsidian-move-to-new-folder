@@ -1,0 +1,9 @@
+{
+  "id": "move-to-new-folder",
+  "name": "Move to New Folder",
+  "version": "1.0.0",
+  "minAppVersion": "1.5.0",
+  "description": "Move notes into newly created folders using a fast, step-by-step flow.",
+  "author": "d0d1",
+  "isDesktopOnly": false
+}
