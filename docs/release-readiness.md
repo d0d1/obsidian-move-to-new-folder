@@ -92,7 +92,7 @@ The main blockers are:
 
 ## Notes
 
-- Folder move support exists, but the command-palette path for folders depends on available folder context. The file explorer context menu is the strongest supported path for folder moves.
+- Folder move support is provided through the file explorer context menu.
 - Initial focus behavior in the move modal still has a documented unresolved quirk. See [docs/investigations/focus.md](/home/dbhul/code/obsidian-move-to-new-folder/docs/investigations/focus.md).
-- Android keyboard behavior for `New folder name` still has a documented unresolved issue. See [docs/investigations/mobile-keyboard.md](/home/dbhul/code/obsidian-move-to-new-folder/docs/investigations/mobile-keyboard.md).
+- Android keyboard behavior for `New folder name` was investigated and resolved for the current release direction by moving the input higher in the modal. See [docs/investigations/mobile-keyboard.md](/home/dbhul/code/obsidian-move-to-new-folder/docs/investigations/mobile-keyboard.md).
 - Modal open-time console performance warnings were investigated once and improved modestly. See [docs/investigations/performance.md](/home/dbhul/code/obsidian-move-to-new-folder/docs/investigations/performance.md).

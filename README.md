@@ -5,7 +5,7 @@
 ## What it does
 
 - Adds `Move file to new folder...` for notes
-- Adds `Move folder to new folder...` for folders
+- Adds `Move folder to new folder...` in the file explorer for folders
 - Lets you choose a parent folder from a searchable picker
 - Creates the new child folder and moves the target safely with Obsidian APIs
 - Preserves Obsidian's normal link-update behavior when moving files
@@ -26,7 +26,7 @@
 2. Run `Move file to new folder...`.
 3. Complete the same modal flow.
 
-Folder moves are primarily supported from the file explorer context menu.
+Folder moves are supported from the file explorer context menu.
 
 ## Settings
 

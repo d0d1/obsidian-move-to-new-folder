@@ -2,9 +2,9 @@
 
 ## Status
 
-This issue is not fully solved.
+This issue is resolved for the current release direction, but not in the ideal originally requested way.
 
-On Android, when the user focuses `New folder name`, the soft keyboard can cover the input instead of the modal reliably moving or reflowing to keep the field visible. Several mitigation attempts were tested and rejected because they either did nothing useful or made the modal layout worse.
+The original goal was to keep the input visible above the Android keyboard while preserving the same centered modal behavior. That was not achieved cleanly. Instead, the accepted solution was to move `New folder name` higher in the modal layout so the mobile experience is acceptable without retaining brittle keyboard-avoidance hacks.
 
 ## Problem statement
 
@@ -15,10 +15,10 @@ Desired behavior:
 - the text input stays visible above the keyboard while typing
 - when typing ends and the keyboard closes, the modal returns to its normal layout
 
-Observed behavior in testing:
+Observed behavior before the accepted layout change:
 
-- the Android keyboard can cover `New folder name`
-- the user may not be able to see what they are typing
+- the Android keyboard could cover `New folder name`
+- the user might not be able to see what they were typing
 - attempted fixes created either no meaningful movement or dead space in the modal without actually solving the occlusion
 
 ## Why this matters
@@ -157,6 +157,18 @@ Assessment:
 
 The plugin currently uses a desktop-style modal pattern. On Android, the input can live too low in the modal for robust keyboard-safe interaction.
 
+### Moving the input higher is an acceptable product compromise
+
+The final accepted approach was not a true keyboard-avoidance implementation.
+
+Instead:
+
+- `New folder name` was moved above `Parent folder`
+- that places the text field in a better location for mobile use
+- the result is acceptable for release even though it does not reproduce ideal native mobile keyboard behavior
+
+This is an intentional product decision, not an accidental leftover state.
+
 ### Local DOM scrolling is not the same as real keyboard avoidance
 
 The repeated failed attempts suggest:
@@ -189,7 +201,8 @@ The repository should keep the clean baseline:
 
 - do not retain speculative `visualViewport` sizing/repositioning hacks that already failed
 - do not keep repeated focus/scroll timing tricks for this issue
-- prefer a structurally simpler mobile UI if the issue is revisited
+- prefer a structurally simpler mobile UI
+- keep the current higher input placement unless there is a clearly better mobile-safe alternative
 
 ## Recommended future path
 
@@ -217,8 +230,9 @@ Unless there is new evidence, do not re-try these as blind experiments:
 
 ## Practical conclusion
 
-The issue is real, the attempts were recorded, and the current conclusion is intentional:
+The issue was investigated thoroughly and the current conclusion is intentional:
 
-- the Android keyboard-covering-input problem remains unresolved
+- the ideal keyboard-avoidance behavior was not achieved
 - previous workaround attempts were not good enough to keep
+- the accepted release solution is the higher input placement in the modal
 - if this is revisited, the next serious step should be a different mobile interaction pattern rather than more local keyboard hacks inside the same modal

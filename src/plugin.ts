@@ -45,23 +45,6 @@ export default class MoveToNewFolderPlugin extends Plugin {
       },
     });
 
-    this.addCommand({
-      id: "move-folder-to-new-folder",
-      name: "Move folder to new folder...",
-      checkCallback: (checking) => {
-        const folder = this.getActiveFolderContext();
-        if (!folder) {
-          return false;
-        }
-
-        if (!checking) {
-          void this.runFolderMoveFlow(folder);
-        }
-
-        return true;
-      },
-    });
-
     this.app.workspace.onLayoutReady(() => {
       this.registerFileMenuAction();
     });
@@ -325,17 +308,5 @@ export default class MoveToNewFolderPlugin extends Plugin {
 
   private isMarkdownFile(file: TAbstractFile): file is TFile {
     return file instanceof TFile && file.extension === "md";
-  }
-
-  private getActiveFolderContext(): TFolder | null {
-    const activeFile = this.app.workspace.getActiveFile();
-    if (activeFile?.parent && activeFile.parent.path.length > 0) {
-      return activeFile.parent;
-    }
-
-    const fileExplorer = this.app.workspace.getLeavesOfType("file-explorer")[0]?.view;
-    const navigator = (fileExplorer as { tree?: { focusedItem?: { file?: TAbstractFile } } } | undefined)?.tree;
-    const focusedFile = navigator?.focusedItem?.file;
-    return focusedFile instanceof TFolder && focusedFile.path.length > 0 ? focusedFile : null;
   }
 }

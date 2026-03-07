@@ -527,20 +527,6 @@ var MoveToNewFolderPlugin = class extends import_obsidian5.Plugin {
         return true;
       }
     });
-    this.addCommand({
-      id: "move-folder-to-new-folder",
-      name: "Move folder to new folder...",
-      checkCallback: (checking) => {
-        const folder = this.getActiveFolderContext();
-        if (!folder) {
-          return false;
-        }
-        if (!checking) {
-          void this.runFolderMoveFlow(folder);
-        }
-        return true;
-      }
-    });
     this.app.workspace.onLayoutReady(() => {
       this.registerFileMenuAction();
     });
@@ -747,16 +733,5 @@ var MoveToNewFolderPlugin = class extends import_obsidian5.Plugin {
   }
   isMarkdownFile(file) {
     return file instanceof import_obsidian5.TFile && file.extension === "md";
-  }
-  getActiveFolderContext() {
-    var _a, _b;
-    const activeFile = this.app.workspace.getActiveFile();
-    if ((activeFile == null ? void 0 : activeFile.parent) && activeFile.parent.path.length > 0) {
-      return activeFile.parent;
-    }
-    const fileExplorer = (_a = this.app.workspace.getLeavesOfType("file-explorer")[0]) == null ? void 0 : _a.view;
-    const navigator = fileExplorer == null ? void 0 : fileExplorer.tree;
-    const focusedFile = (_b = navigator == null ? void 0 : navigator.focusedItem) == null ? void 0 : _b.file;
-    return focusedFile instanceof import_obsidian5.TFolder && focusedFile.path.length > 0 ? focusedFile : null;
   }
 };
