@@ -47,14 +47,14 @@ This plugin is currently in beta and can be installed through BRAT before offici
 3. Enter `d0d1/obsidian-move-to-new-folder`.
 4. Install **Move to New Folder** from BRAT.
 
-## Manual installation
+## Install from GitHub release
 
-If you prefer not to use BRAT, you can install the plugin manually:
+If you prefer not to use BRAT, you can install the plugin from the latest GitHub release:
 
-1. Run `npm install`
-2. Run `npm run build`
-3. Copy `main.js`, `manifest.json`, and `styles.css` into your vault's `.obsidian/plugins/move-to-new-folder/` folder
-4. Enable **Move to New Folder** in Obsidian
+1. Download `main.js`, `manifest.json`, and `styles.css` from the latest release.
+2. Create the folder `.obsidian/plugins/move-to-new-folder/` in your vault if it does not already exist.
+3. Copy the downloaded files into that folder.
+4. Enable **Move to New Folder** in Obsidian.
 
 ## Privacy and external services
 
