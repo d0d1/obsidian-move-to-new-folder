@@ -35,6 +35,7 @@ var ParentFolderPickerModal = class extends import_obsidian.Modal {
     this.searchValue = "";
     this.selectedIndex = 0;
     this.listByPath = /* @__PURE__ */ new Map();
+    this.didResolve = false;
     this.initialPath = initialPath;
     this.selectedPath = initialPath;
     this.onCloseResolve = onCloseResolve;
@@ -148,6 +149,9 @@ var ParentFolderPickerModal = class extends import_obsidian.Modal {
     searchInput.select();
   }
   onClose() {
+    if (!this.didResolve) {
+      this.onCloseResolve({ selectedPath: null });
+    }
     this.modalEl.removeClass("move-to-new-folder-modal");
     this.contentEl.empty();
   }
@@ -185,6 +189,7 @@ var ParentFolderPickerModal = class extends import_obsidian.Modal {
     }
   }
   closeWithResult(selectedPath) {
+    this.didResolve = true;
     this.onCloseResolve({ selectedPath });
     this.close();
   }
@@ -192,6 +197,7 @@ var ParentFolderPickerModal = class extends import_obsidian.Modal {
 var TextPromptModal = class extends import_obsidian.Modal {
   constructor(app, title, placeholder, submitText, onCloseResolve) {
     super(app);
+    this.didResolve = false;
     this.title = title;
     this.placeholder = placeholder;
     this.submitText = submitText;
@@ -244,9 +250,13 @@ var TextPromptModal = class extends import_obsidian.Modal {
     input.select();
   }
   onClose() {
+    if (!this.didResolve) {
+      this.onCloseResolve({ value: null });
+    }
     this.contentEl.empty();
   }
   closeWithResult(value) {
+    this.didResolve = true;
     this.onCloseResolve({ value });
     this.close();
   }
@@ -254,6 +264,7 @@ var TextPromptModal = class extends import_obsidian.Modal {
 var ConfirmationModal = class extends import_obsidian.Modal {
   constructor(app, titleText, bodyText, confirmText, onCloseResolve) {
     super(app);
+    this.didResolve = false;
     this.titleText = titleText;
     this.bodyText = bodyText;
     this.confirmText = confirmText;
@@ -279,9 +290,13 @@ var ConfirmationModal = class extends import_obsidian.Modal {
     confirmButton.addEventListener("click", () => this.closeWithResult(true));
   }
   onClose() {
+    if (!this.didResolve) {
+      this.onCloseResolve(false);
+    }
     this.contentEl.empty();
   }
   closeWithResult(confirmed) {
+    this.didResolve = true;
     this.onCloseResolve(confirmed);
     this.close();
   }
@@ -462,11 +477,13 @@ var MoveToNewFolderPlugin = class extends import_obsidian.Plugin {
     await targetLeaf.openFile(file, { active: true });
   }
   getActiveMarkdownFileContext() {
+    var _a;
     const file = this.app.workspace.getActiveFile();
     if (!file || file.extension !== "md") {
       return null;
     }
-    const leaf = this.app.workspace.getMostRecentLeaf();
+    const markdownView = this.app.workspace.getActiveViewOfType(import_obsidian.MarkdownView);
+    const leaf = (_a = markdownView == null ? void 0 : markdownView.leaf) != null ? _a : this.app.workspace.getMostRecentLeaf();
     return { file, leaf: leaf != null ? leaf : void 0 };
   }
   isMarkdownFile(file) {

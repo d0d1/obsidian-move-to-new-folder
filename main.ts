@@ -1,5 +1,6 @@
 import {
   App,
+  MarkdownView,
   Menu,
   Modal,
   Notice,
@@ -37,6 +38,7 @@ class ParentFolderPickerModal extends Modal {
   private selectedPath: string;
   private readonly folderPaths: string[];
   private readonly listByPath: Map<string, HTMLButtonElement> = new Map();
+  private didResolve = false;
 
   constructor(app: App, initialPath: string, onCloseResolve: (result: ParentFolderPickerResult) => void) {
     super(app);
@@ -176,6 +178,9 @@ class ParentFolderPickerModal extends Modal {
   }
 
   onClose(): void {
+    if (!this.didResolve) {
+      this.onCloseResolve({ selectedPath: null });
+    }
     this.modalEl.removeClass("move-to-new-folder-modal");
     this.contentEl.empty();
   }
@@ -221,6 +226,7 @@ class ParentFolderPickerModal extends Modal {
   }
 
   private closeWithResult(selectedPath: string | null): void {
+    this.didResolve = true;
     this.onCloseResolve({ selectedPath });
     this.close();
   }
@@ -231,6 +237,7 @@ class TextPromptModal extends Modal {
   private readonly placeholder: string;
   private readonly submitText: string;
   private readonly onCloseResolve: (result: TextPromptResult) => void;
+  private didResolve = false;
 
   constructor(
     app: App,
@@ -304,10 +311,14 @@ class TextPromptModal extends Modal {
   }
 
   onClose(): void {
+    if (!this.didResolve) {
+      this.onCloseResolve({ value: null });
+    }
     this.contentEl.empty();
   }
 
   private closeWithResult(value: string | null): void {
+    this.didResolve = true;
     this.onCloseResolve({ value });
     this.close();
   }
@@ -318,6 +329,7 @@ class ConfirmationModal extends Modal {
   private readonly bodyText: string;
   private readonly confirmText: string;
   private readonly onCloseResolve: (confirmed: boolean) => void;
+  private didResolve = false;
 
   constructor(
     app: App,
@@ -357,10 +369,14 @@ class ConfirmationModal extends Modal {
   }
 
   onClose(): void {
+    if (!this.didResolve) {
+      this.onCloseResolve(false);
+    }
     this.contentEl.empty();
   }
 
   private closeWithResult(confirmed: boolean): void {
+    this.didResolve = true;
     this.onCloseResolve(confirmed);
     this.close();
   }
@@ -587,7 +603,8 @@ export default class MoveToNewFolderPlugin extends Plugin {
       return null;
     }
 
-    const leaf = this.app.workspace.getMostRecentLeaf();
+    const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
+    const leaf = markdownView?.leaf ?? this.app.workspace.getMostRecentLeaf();
     return { file, leaf: leaf ?? undefined };
   }
 
