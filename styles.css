@@ -4,11 +4,43 @@
 
 .move-to-new-folder-modal .move-to-new-folder-hint {
   color: var(--text-muted);
-  margin-bottom: 0.75rem;
+  margin: 0;
 }
 
 .move-to-new-folder-modal .move-to-new-folder-search {
   margin-bottom: 0.75rem;
+}
+
+.move-to-new-folder-modal .move-to-new-folder-step {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.move-to-new-folder-modal .move-to-new-folder-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.move-to-new-folder-modal .move-to-new-folder-label {
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+  font-weight: var(--font-medium);
+}
+
+.move-to-new-folder-modal .move-to-new-folder-parent-path {
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+  background: var(--background-secondary);
+  color: var(--text-normal);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.move-to-new-folder-modal .move-to-new-folder-text-input {
+  width: 100%;
 }
 
 .move-to-new-folder-modal .move-to-new-folder-list {
@@ -50,7 +82,7 @@
 }
 
 .move-to-new-folder-modal .move-to-new-folder-actions {
-  margin-top: 0.75rem;
+  margin-top: 1rem;
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;

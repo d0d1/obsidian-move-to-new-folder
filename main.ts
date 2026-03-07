@@ -27,6 +27,7 @@ interface ParentFolderPickerResult {
 }
 
 interface TextPromptResult {
+  action: "submit" | "back" | "cancel";
   value: string | null;
 }
 
@@ -57,7 +58,7 @@ class ParentFolderPickerModal extends Modal {
     const { contentEl } = this;
     this.modalEl.addClass("move-to-new-folder-modal");
     contentEl.empty();
-    contentEl.createEl("h2", { text: "Choose a parent folder" });
+    this.setTitle("Choose a parent folder");
     contentEl.createEl("p", {
       text: "Search by typing or pick a folder from the list.",
       cls: "move-to-new-folder-hint",
@@ -243,49 +244,74 @@ class ParentFolderPickerModal extends Modal {
 }
 
 class TextPromptModal extends Modal {
-  private readonly title: string;
   private readonly placeholder: string;
   private readonly submitText: string;
+  private readonly parentFolderPath: string;
   private readonly onCloseResolve: (result: TextPromptResult) => void;
   private didResolve = false;
 
   constructor(
     app: App,
-    title: string,
     placeholder: string,
     submitText: string,
+    parentFolderPath: string,
     onCloseResolve: (result: TextPromptResult) => void,
   ) {
     super(app);
-    this.title = title;
     this.placeholder = placeholder;
     this.submitText = submitText;
+    this.parentFolderPath = parentFolderPath;
     this.onCloseResolve = onCloseResolve;
   }
 
   onOpen(): void {
     const { contentEl } = this;
     contentEl.empty();
-    contentEl.createEl("h2", { text: this.title });
+    this.setTitle("Create a new folder");
 
-    const input = contentEl.createEl("input", {
-      type: "text",
-      placeholder: this.placeholder,
+    const layoutEl = contentEl.createDiv({ cls: "move-to-new-folder-step" });
+
+    const parentSectionEl = layoutEl.createDiv({ cls: "move-to-new-folder-section" });
+    parentSectionEl.createEl("div", {
+      text: "Selected parent folder",
+      cls: "move-to-new-folder-label",
+    });
+    parentSectionEl.createEl("div", {
+      text: this.parentFolderPath.length > 0 ? this.parentFolderPath : "/",
+      cls: "move-to-new-folder-parent-path",
     });
 
-    const hintEl = contentEl.createDiv({
+    const inputSectionEl = layoutEl.createDiv({ cls: "move-to-new-folder-section" });
+    inputSectionEl.createEl("label", {
+      text: "New folder name",
+      cls: "move-to-new-folder-label",
+    });
+
+    const input = inputSectionEl.createEl("input", {
+      type: "text",
+      placeholder: this.placeholder,
+      cls: "move-to-new-folder-text-input",
+    });
+
+    const hintEl = inputSectionEl.createDiv({
       text: "Enter only a folder name, not a full path.",
       cls: "move-to-new-folder-hint",
     });
 
     const actionsEl = contentEl.createDiv({ cls: "move-to-new-folder-actions" });
 
+    const backButton = actionsEl.createEl("button", {
+      text: "Back",
+    });
+    backButton.type = "button";
+    backButton.addEventListener("click", () => this.closeWithResult("back", null));
+
     const cancelButton = actionsEl.createEl("button", {
       text: "Cancel",
       cls: "mod-muted",
     });
     cancelButton.type = "button";
-    cancelButton.addEventListener("click", () => this.closeWithResult(null));
+    cancelButton.addEventListener("click", () => this.closeWithResult("cancel", null));
 
     const submitButton = actionsEl.createEl("button", {
       text: this.submitText,
@@ -305,7 +331,7 @@ class TextPromptModal extends Modal {
         return;
       }
 
-      this.closeWithResult(value);
+      this.closeWithResult("submit", value);
     };
 
     submitButton.addEventListener("click", submit);
@@ -322,14 +348,14 @@ class TextPromptModal extends Modal {
 
   onClose(): void {
     if (!this.didResolve) {
-      this.onCloseResolve({ value: null });
+      this.onCloseResolve({ action: "cancel", value: null });
     }
     this.contentEl.empty();
   }
 
-  private closeWithResult(value: string | null): void {
+  private closeWithResult(action: "submit" | "back" | "cancel", value: string | null): void {
     this.didResolve = true;
-    this.onCloseResolve({ value });
+    this.onCloseResolve({ action, value });
     this.close();
   }
 }
@@ -358,7 +384,7 @@ class ConfirmationModal extends Modal {
   onOpen(): void {
     const { contentEl } = this;
     contentEl.empty();
-    contentEl.createEl("h2", { text: this.titleText });
+    this.setTitle(this.titleText);
     contentEl.createEl("p", { text: this.bodyText });
 
     const actionsEl = contentEl.createDiv({ cls: "move-to-new-folder-actions" });
@@ -479,20 +505,36 @@ export default class MoveToNewFolderPlugin extends Plugin {
   }
 
   private async runMoveFlow(file: TFile, leaf?: WorkspaceLeaf): Promise<void> {
-    const parentDefaultPath = this.settings.defaultToCurrentParent ? file.parent?.path ?? "" : "";
+    let selectedParentPath = this.settings.defaultToCurrentParent ? file.parent?.path ?? "" : "";
+    let newFolderName: string | null = null;
 
-    const pickedParent = await this.pickParentFolder(parentDefaultPath);
-    if (pickedParent === null) {
-      return;
+    while (true) {
+      const pickedParent = await this.pickParentFolder(selectedParentPath);
+      if (pickedParent === null) {
+        return;
+      }
+
+      selectedParentPath = pickedParent;
+
+      const folderPromptResult = await this.promptForFolderName(selectedParentPath);
+      if (folderPromptResult.action === "cancel") {
+        return;
+      }
+
+      if (folderPromptResult.action === "back") {
+        continue;
+      }
+
+      newFolderName = folderPromptResult.value;
+      break;
     }
 
-    const newFolderName = await this.promptForFolderName();
     if (newFolderName === null) {
       return;
     }
 
     const targetFolderPath = normalizePath(
-      pickedParent.length > 0 ? `${pickedParent}/${newFolderName}` : newFolderName,
+      selectedParentPath.length > 0 ? `${selectedParentPath}/${newFolderName}` : newFolderName,
     );
 
     const targetFolder = await this.ensureTargetFolder(targetFolderPath);
@@ -585,15 +627,15 @@ export default class MoveToNewFolderPlugin extends Plugin {
     });
   }
 
-  private async promptForFolderName(): Promise<string | null> {
+  private async promptForFolderName(parentFolderPath: string): Promise<TextPromptResult> {
     return new Promise((resolve) => {
       const modal = new TextPromptModal(
         this.app,
-        "Create a new folder",
         "New folder name",
         "Continue",
+        parentFolderPath,
         (result) => {
-          resolve(result.value);
+          resolve(result);
         },
       );
       modal.open();
