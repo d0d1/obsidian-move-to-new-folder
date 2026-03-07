@@ -34,7 +34,6 @@ Folder moves are supported from the file explorer context menu.
 
 ## Platform support
 
-- `isDesktopOnly` is `false`
 - Designed for desktop and mobile
 - Tested primarily on Windows and Android
 - Other supported Obsidian platforms may work but are not fully validated yet
