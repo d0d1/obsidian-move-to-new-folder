@@ -57,6 +57,19 @@
   width: 100%;
 }
 
+.move-to-new-folder-modal .move-to-new-folder-validation {
+  font-size: var(--font-ui-small);
+  line-height: 1.35;
+}
+
+.move-to-new-folder-modal .move-to-new-folder-validation.is-valid {
+  color: var(--text-muted);
+}
+
+.move-to-new-folder-modal .move-to-new-folder-validation.is-invalid {
+  color: var(--text-error);
+}
+
 .move-to-new-folder-modal .move-to-new-folder-list {
   max-height: 260px;
   overflow-y: auto;

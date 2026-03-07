@@ -4,6 +4,7 @@ import {
   Menu,
   Modal,
   Notice,
+  Platform,
   Plugin,
   PluginSettingTab,
   Setting,
@@ -25,6 +26,124 @@ const DEFAULT_SETTINGS: MoveToNewFolderSettings = {
 interface MoveToNewFolderModalResult {
   parentPath: string;
   folderName: string;
+}
+
+interface FolderNameValidationResult {
+  isValid: boolean;
+  message: string;
+}
+
+function getInvalidFolderCharactersForCurrentPlatform(): string[] {
+  if (Platform.isWin) {
+    return ["\\", "/", ":", "*", "?", "\"", "<", ">", "|"];
+  }
+
+  if (Platform.isAndroidApp) {
+    return ["\\", "/", ":", "*", "?", "<", ">", "\""];
+  }
+
+  if (Platform.isMacOS || Platform.isLinux || Platform.isIosApp) {
+    return ["\\", "/", ":"];
+  }
+
+  return ["\\", "/", ":"];
+}
+
+function getCurrentPlatformLabel(): string {
+  if (Platform.isWin) {
+    return "Windows";
+  }
+
+  if (Platform.isAndroidApp) {
+    return "Android";
+  }
+
+  if (Platform.isMacOS) {
+    return "macOS";
+  }
+
+  if (Platform.isIosApp) {
+    return "iOS/iPadOS";
+  }
+
+  if (Platform.isLinux) {
+    return "Linux";
+  }
+
+  return "this platform";
+}
+
+function validateFolderNameForCurrentPlatform(folderName: string): FolderNameValidationResult {
+  const trimmedName = folderName.trim();
+
+  if (!trimmedName) {
+    return {
+      isValid: false,
+      message: "Folder name cannot be empty.",
+    };
+  }
+
+  if (trimmedName.startsWith(".")) {
+    return {
+      isValid: false,
+      message: "Folder name cannot start with a period.",
+    };
+  }
+
+  const invalidCharacters = getInvalidFolderCharactersForCurrentPlatform();
+  const invalidCharacter = invalidCharacters.find((character) => trimmedName.includes(character));
+  if (invalidCharacter) {
+    return {
+      isValid: false,
+      message: `“${invalidCharacter}” is not allowed on ${getCurrentPlatformLabel()}.`,
+    };
+  }
+
+  if (Platform.isWin) {
+    if (trimmedName.endsWith(".") || trimmedName.endsWith(" ")) {
+      return {
+        isValid: false,
+        message: "Windows folder names cannot end with a period or space.",
+      };
+    }
+
+    const reservedNames = new Set([
+      "CON",
+      "PRN",
+      "AUX",
+      "NUL",
+      "COM1",
+      "COM2",
+      "COM3",
+      "COM4",
+      "COM5",
+      "COM6",
+      "COM7",
+      "COM8",
+      "COM9",
+      "LPT1",
+      "LPT2",
+      "LPT3",
+      "LPT4",
+      "LPT5",
+      "LPT6",
+      "LPT7",
+      "LPT8",
+      "LPT9",
+    ]);
+
+    if (reservedNames.has(trimmedName.toUpperCase())) {
+      return {
+        isValid: false,
+        message: `“${trimmedName}” is reserved on Windows.`,
+      };
+    }
+  }
+
+  return {
+    isValid: true,
+    message: `Valid on ${getCurrentPlatformLabel()}.`,
+  };
 }
 
 class MoveToNewFolderModal extends Modal {
@@ -84,6 +203,9 @@ class MoveToNewFolderModal extends Modal {
       cls: "move-to-new-folder-text-input",
     });
     nameInput.value = this.folderName;
+    const validationEl = nameSectionEl.createDiv({
+      cls: "move-to-new-folder-validation",
+    });
 
     const updateSelectedParent = (): void => {
       selectedParentEl.empty();
@@ -195,20 +317,25 @@ class MoveToNewFolderModal extends Modal {
       }
     });
 
+    const updateValidationState = (): FolderNameValidationResult => {
+      const validation = validateFolderNameForCurrentPlatform(nameInput.value);
+      validationEl.setText(validation.message);
+      validationEl.toggleClass("is-invalid", !validation.isValid);
+      validationEl.toggleClass("is-valid", validation.isValid);
+      chooseButton.disabled = !validation.isValid;
+      return validation;
+    };
+
     nameInput.addEventListener("input", () => {
       this.folderName = nameInput.value;
+      updateValidationState();
     });
 
     const submit = (): void => {
       const value = nameInput.value.trim();
-      if (!value) {
-        new Notice("Folder name cannot be empty.");
-        nameInput.focus();
-        return;
-      }
-
-      if (value.includes("/") || value.includes("\\")) {
-        new Notice("Folder name cannot contain path separators.");
+      const validation = validateFolderNameForCurrentPlatform(value);
+      if (!validation.isValid) {
+        new Notice(validation.message);
         nameInput.focus();
         return;
       }
@@ -236,6 +363,7 @@ class MoveToNewFolderModal extends Modal {
     chooseButton.addEventListener("click", submit);
 
     render();
+    updateValidationState();
     nameInput.focus();
     nameInput.select();
   }

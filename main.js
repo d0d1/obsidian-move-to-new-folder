@@ -29,6 +29,101 @@ var import_obsidian = require("obsidian");
 var DEFAULT_SETTINGS = {
   defaultToCurrentParent: true
 };
+function getInvalidFolderCharactersForCurrentPlatform() {
+  if (import_obsidian.Platform.isWin) {
+    return ["\\", "/", ":", "*", "?", '"', "<", ">", "|"];
+  }
+  if (import_obsidian.Platform.isAndroidApp) {
+    return ["\\", "/", ":", "*", "?", "<", ">", '"'];
+  }
+  if (import_obsidian.Platform.isMacOS || import_obsidian.Platform.isLinux || import_obsidian.Platform.isIosApp) {
+    return ["\\", "/", ":"];
+  }
+  return ["\\", "/", ":"];
+}
+function getCurrentPlatformLabel() {
+  if (import_obsidian.Platform.isWin) {
+    return "Windows";
+  }
+  if (import_obsidian.Platform.isAndroidApp) {
+    return "Android";
+  }
+  if (import_obsidian.Platform.isMacOS) {
+    return "macOS";
+  }
+  if (import_obsidian.Platform.isIosApp) {
+    return "iOS/iPadOS";
+  }
+  if (import_obsidian.Platform.isLinux) {
+    return "Linux";
+  }
+  return "this platform";
+}
+function validateFolderNameForCurrentPlatform(folderName) {
+  const trimmedName = folderName.trim();
+  if (!trimmedName) {
+    return {
+      isValid: false,
+      message: "Folder name cannot be empty."
+    };
+  }
+  if (trimmedName.startsWith(".")) {
+    return {
+      isValid: false,
+      message: "Folder name cannot start with a period."
+    };
+  }
+  const invalidCharacters = getInvalidFolderCharactersForCurrentPlatform();
+  const invalidCharacter = invalidCharacters.find((character) => trimmedName.includes(character));
+  if (invalidCharacter) {
+    return {
+      isValid: false,
+      message: `\u201C${invalidCharacter}\u201D is not allowed on ${getCurrentPlatformLabel()}.`
+    };
+  }
+  if (import_obsidian.Platform.isWin) {
+    if (trimmedName.endsWith(".") || trimmedName.endsWith(" ")) {
+      return {
+        isValid: false,
+        message: "Windows folder names cannot end with a period or space."
+      };
+    }
+    const reservedNames = /* @__PURE__ */ new Set([
+      "CON",
+      "PRN",
+      "AUX",
+      "NUL",
+      "COM1",
+      "COM2",
+      "COM3",
+      "COM4",
+      "COM5",
+      "COM6",
+      "COM7",
+      "COM8",
+      "COM9",
+      "LPT1",
+      "LPT2",
+      "LPT3",
+      "LPT4",
+      "LPT5",
+      "LPT6",
+      "LPT7",
+      "LPT8",
+      "LPT9"
+    ]);
+    if (reservedNames.has(trimmedName.toUpperCase())) {
+      return {
+        isValid: false,
+        message: `\u201C${trimmedName}\u201D is reserved on Windows.`
+      };
+    }
+  }
+  return {
+    isValid: true,
+    message: `Valid on ${getCurrentPlatformLabel()}.`
+  };
+}
 var MoveToNewFolderModal = class extends import_obsidian.Modal {
   constructor(app, initialPath, onCloseResolve) {
     super(app);
@@ -73,6 +168,9 @@ var MoveToNewFolderModal = class extends import_obsidian.Modal {
       cls: "move-to-new-folder-text-input"
     });
     nameInput.value = this.folderName;
+    const validationEl = nameSectionEl.createDiv({
+      cls: "move-to-new-folder-validation"
+    });
     const updateSelectedParent = () => {
       selectedParentEl.empty();
       selectedParentEl.createSpan({
@@ -164,18 +262,23 @@ var MoveToNewFolderModal = class extends import_obsidian.Modal {
         submit();
       }
     });
+    const updateValidationState = () => {
+      const validation = validateFolderNameForCurrentPlatform(nameInput.value);
+      validationEl.setText(validation.message);
+      validationEl.toggleClass("is-invalid", !validation.isValid);
+      validationEl.toggleClass("is-valid", validation.isValid);
+      chooseButton.disabled = !validation.isValid;
+      return validation;
+    };
     nameInput.addEventListener("input", () => {
       this.folderName = nameInput.value;
+      updateValidationState();
     });
     const submit = () => {
       const value = nameInput.value.trim();
-      if (!value) {
-        new import_obsidian.Notice("Folder name cannot be empty.");
-        nameInput.focus();
-        return;
-      }
-      if (value.includes("/") || value.includes("\\")) {
-        new import_obsidian.Notice("Folder name cannot contain path separators.");
+      const validation = validateFolderNameForCurrentPlatform(value);
+      if (!validation.isValid) {
+        new import_obsidian.Notice(validation.message);
         nameInput.focus();
         return;
       }
@@ -199,6 +302,7 @@ var MoveToNewFolderModal = class extends import_obsidian.Modal {
     chooseButton.type = "button";
     chooseButton.addEventListener("click", submit);
     render();
+    updateValidationState();
     nameInput.focus();
     nameInput.select();
   }

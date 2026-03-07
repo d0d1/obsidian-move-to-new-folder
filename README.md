@@ -16,6 +16,7 @@ Then the plugin creates the folder (if needed) and moves the note safely.
 - File menu support for open note tabs when Obsidian emits `file-menu` for that source
 - Searchable parent-folder picker with keyboard and mouse navigation
 - Separate prompt for the new folder name (no manual full-path typing)
+- Inline folder-name validation based on the current Obsidian platform
 - Folder conflict handling:
   - If folder exists, prompt to reuse or cancel
   - If a file exists at folder path, stop with an error notice
