@@ -40,6 +40,8 @@ Folder moves are supported from the file explorer context menu.
 
 ## Install with BRAT
 
+This plugin is currently in beta and can be installed through BRAT before official Community Plugins submission.
+
 1. Install and enable the BRAT plugin in Obsidian.
 2. In BRAT, choose to add a beta plugin from GitHub.
 3. Enter `d0d1/obsidian-move-to-new-folder`.
