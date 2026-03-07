@@ -49,6 +49,8 @@ This plugin is currently in beta and can be installed through BRAT before offici
 
 ## Manual installation
 
+If you prefer not to use BRAT, you can install the plugin manually:
+
 1. Run `npm install`
 2. Run `npm run build`
 3. Copy `main.js`, `manifest.json`, and `styles.css` into your vault's `.obsidian/plugins/move-to-new-folder/` folder
@@ -62,7 +64,3 @@ This plugin is currently in beta and can be installed through BRAT before offici
 - No account requirement
 - No payments or subscriptions
 - No external service dependencies at runtime
-
-## License
-
-`GPL-3.0-only`. See [LICENSE](LICENSE).
