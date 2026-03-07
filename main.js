@@ -182,6 +182,7 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
     this.hasEditedFolderName = false;
     this.listByPath = /* @__PURE__ */ new Map();
     this.didResolve = false;
+    this.hasRevealedInitialSelection = false;
     this.selectedPath = initialPath;
     this.targetKind = targetKind;
     this.onCloseResolve = onCloseResolve;
@@ -240,7 +241,7 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
         text: this.selectedPath.length > 0 ? this.selectedPath : "/"
       });
     };
-    const render = () => {
+    const render = (scrollBehavior = "preserve") => {
       listEl.empty();
       this.listByPath.clear();
       const filtered = this.getFilteredFolders();
@@ -278,7 +279,7 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
         }
         button.addEventListener("click", () => {
           this.selectedPath = folderPath;
-          render();
+          render("preserve");
         });
         button.addEventListener("mouseenter", () => {
           button.addClass("is-hovered");
@@ -288,7 +289,7 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
         });
         this.listByPath.set(folderPath, button);
       }
-      this.refreshSelection(listEl, filtered);
+      this.refreshSelection(listEl, filtered, scrollBehavior);
     };
     searchInput.addEventListener("input", () => {
       this.searchValue = searchInput.value.trim();
@@ -299,7 +300,7 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
           this.selectedPath = filtered[0];
         }
       }
-      render();
+      render("preserve");
     });
     searchInput.addEventListener("keydown", (event) => {
       const filtered = this.getFilteredFolders();
@@ -308,7 +309,7 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
         if (filtered.length > 0) {
           this.selectedIndex = Math.min(this.selectedIndex + 1, filtered.length - 1);
           this.selectedPath = filtered[this.selectedIndex];
-          this.refreshSelection(listEl, filtered);
+          this.refreshSelection(listEl, filtered, "preserve");
         }
       }
       if (event.key === "ArrowUp") {
@@ -316,7 +317,7 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
         if (filtered.length > 0) {
           this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
           this.selectedPath = filtered[this.selectedIndex];
-          this.refreshSelection(listEl, filtered);
+          this.refreshSelection(listEl, filtered, "preserve");
         }
       }
       if (event.key === "Enter") {
@@ -385,7 +386,7 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
       });
     };
     moveButton.addEventListener("click", submit);
-    render();
+    render("initial");
     if (!import_obsidian3.Platform.isMobile) {
       nameInput.focus();
       nameInput.select();
@@ -417,19 +418,32 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
       return haystack.includes(needle);
     });
   }
-  refreshSelection(listEl, filtered) {
+  refreshSelection(listEl, filtered, scrollBehavior) {
     for (const [path, button] of this.listByPath.entries()) {
       const shouldSelect = path === this.selectedPath;
       button.toggleClass("is-selected", shouldSelect);
       if (shouldSelect) {
-        button.scrollIntoView({ block: "nearest" });
+        if (scrollBehavior === "initial" && !this.hasRevealedInitialSelection) {
+          const targetTop = Math.max(button.offsetTop - 8, 0);
+          listEl.scrollTop = targetTop;
+          this.hasRevealedInitialSelection = true;
+        } else if (!this.isElementFullyVisible(listEl, button)) {
+          button.scrollIntoView({ block: "nearest" });
+        }
       }
     }
     if (!filtered.includes(this.selectedPath) && filtered.length > 0) {
       this.selectedIndex = 0;
       this.selectedPath = filtered[0];
-      this.refreshSelection(listEl, filtered);
+      this.refreshSelection(listEl, filtered, scrollBehavior);
     }
+  }
+  isElementFullyVisible(containerEl, itemEl) {
+    const itemTop = itemEl.offsetTop;
+    const itemBottom = itemTop + itemEl.offsetHeight;
+    const visibleTop = containerEl.scrollTop;
+    const visibleBottom = visibleTop + containerEl.clientHeight;
+    return itemTop >= visibleTop && itemBottom <= visibleBottom;
   }
   closeWithResult(result) {
     this.didResolve = true;

@@ -21,6 +21,7 @@ export class MoveToNewFolderModal extends Modal {
   private readonly folderPaths: string[];
   private readonly listByPath: Map<string, HTMLButtonElement> = new Map();
   private didResolve = false;
+  private hasRevealedInitialSelection = false;
 
   constructor(
     app: App,
@@ -98,7 +99,7 @@ export class MoveToNewFolderModal extends Modal {
       });
     };
 
-    const render = (): void => {
+    const render = (scrollBehavior: "initial" | "preserve" = "preserve"): void => {
       listEl.empty();
       this.listByPath.clear();
 
@@ -144,7 +145,7 @@ export class MoveToNewFolderModal extends Modal {
 
         button.addEventListener("click", () => {
           this.selectedPath = folderPath;
-          render();
+          render("preserve");
         });
 
         button.addEventListener("mouseenter", () => {
@@ -158,7 +159,7 @@ export class MoveToNewFolderModal extends Modal {
         this.listByPath.set(folderPath, button);
       }
 
-      this.refreshSelection(listEl, filtered);
+      this.refreshSelection(listEl, filtered, scrollBehavior);
     };
 
     searchInput.addEventListener("input", () => {
@@ -170,7 +171,7 @@ export class MoveToNewFolderModal extends Modal {
           this.selectedPath = filtered[0];
         }
       }
-      render();
+      render("preserve");
     });
 
     searchInput.addEventListener("keydown", (event) => {
@@ -181,7 +182,7 @@ export class MoveToNewFolderModal extends Modal {
         if (filtered.length > 0) {
           this.selectedIndex = Math.min(this.selectedIndex + 1, filtered.length - 1);
           this.selectedPath = filtered[this.selectedIndex];
-          this.refreshSelection(listEl, filtered);
+          this.refreshSelection(listEl, filtered, "preserve");
         }
       }
 
@@ -190,7 +191,7 @@ export class MoveToNewFolderModal extends Modal {
         if (filtered.length > 0) {
           this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
           this.selectedPath = filtered[this.selectedIndex];
-          this.refreshSelection(listEl, filtered);
+          this.refreshSelection(listEl, filtered, "preserve");
         }
       }
 
@@ -272,7 +273,7 @@ export class MoveToNewFolderModal extends Modal {
 
     moveButton.addEventListener("click", submit);
 
-    render();
+    render("initial");
     if (!Platform.isMobile) {
       nameInput.focus();
       nameInput.select();
@@ -311,20 +312,38 @@ export class MoveToNewFolderModal extends Modal {
     });
   }
 
-  private refreshSelection(listEl: HTMLElement, filtered: string[]): void {
+  private refreshSelection(
+    listEl: HTMLElement,
+    filtered: string[],
+    scrollBehavior: "initial" | "preserve",
+  ): void {
     for (const [path, button] of this.listByPath.entries()) {
       const shouldSelect = path === this.selectedPath;
       button.toggleClass("is-selected", shouldSelect);
       if (shouldSelect) {
-        button.scrollIntoView({ block: "nearest" });
+        if (scrollBehavior === "initial" && !this.hasRevealedInitialSelection) {
+          const targetTop = Math.max(button.offsetTop - 8, 0);
+          listEl.scrollTop = targetTop;
+          this.hasRevealedInitialSelection = true;
+        } else if (!this.isElementFullyVisible(listEl, button)) {
+          button.scrollIntoView({ block: "nearest" });
+        }
       }
     }
 
     if (!filtered.includes(this.selectedPath) && filtered.length > 0) {
       this.selectedIndex = 0;
       this.selectedPath = filtered[0];
-      this.refreshSelection(listEl, filtered);
+      this.refreshSelection(listEl, filtered, scrollBehavior);
     }
+  }
+
+  private isElementFullyVisible(containerEl: HTMLElement, itemEl: HTMLElement): boolean {
+    const itemTop = itemEl.offsetTop;
+    const itemBottom = itemTop + itemEl.offsetHeight;
+    const visibleTop = containerEl.scrollTop;
+    const visibleBottom = visibleTop + containerEl.clientHeight;
+    return itemTop >= visibleTop && itemBottom <= visibleBottom;
   }
 
   private closeWithResult(result: MoveToNewFolderModalResult | null): void {
