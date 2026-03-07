@@ -2,8 +2,6 @@ import { App, Modal, Notice, Platform, TFolder } from "obsidian";
 
 import { validateFolderNameForCurrentPlatform, type FolderNameValidationResult } from "../validation/folderNameValidation";
 
-const TEMP_BUILD_MARKER = 11;
-
 export interface MoveToNewFolderModalResult {
   parentPath: string;
   folderName: string;
@@ -54,8 +52,8 @@ export class MoveToNewFolderModal extends Modal {
     contentEl.empty();
     this.setTitle(
       this.targetKind === "folder"
-        ? `Move folder to new folder ${TEMP_BUILD_MARKER}`
-        : `Move file to new folder ${TEMP_BUILD_MARKER}`,
+        ? "Move folder to new folder"
+        : "Move file to new folder",
     );
 
     const layoutEl = contentEl.createDiv({ cls: "move-to-new-folder-layout" });

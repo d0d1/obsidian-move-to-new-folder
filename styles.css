@@ -159,3 +159,27 @@
 .move-to-new-folder-modal.move-to-new-folder-modal-mobile .move-to-new-folder-actions {
   padding-bottom: 0.25rem;
 }
+
+.move-to-new-folder-confirmation-modal {
+  width: min(480px, 90vw);
+}
+
+.move-to-new-folder-confirmation-modal .modal-content {
+  padding-top: 0.25rem;
+}
+
+.move-to-new-folder-confirmation-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.44rem;
+}
+
+.move-to-new-folder-confirmation-text {
+  margin: 0;
+  color: var(--text-normal);
+  line-height: 1.45;
+}
+
+.move-to-new-folder-confirmation-modal .move-to-new-folder-actions {
+  margin-top: 0.85rem;
+}

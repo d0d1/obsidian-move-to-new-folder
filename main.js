@@ -30,42 +30,49 @@ var import_obsidian5 = require("obsidian");
 // src/modals/confirmationModal.ts
 var import_obsidian = require("obsidian");
 var ConfirmationModal = class extends import_obsidian.Modal {
-  constructor(app, titleText, bodyText, confirmText, onCloseResolve) {
+  constructor(app, titleText, bodyText, backText, confirmText, onCloseResolve) {
     super(app);
     this.didResolve = false;
     this.titleText = titleText;
     this.bodyText = bodyText;
+    this.backText = backText;
     this.confirmText = confirmText;
     this.onCloseResolve = onCloseResolve;
   }
   onOpen() {
     const { contentEl } = this;
+    this.modalEl.addClass("move-to-new-folder-confirmation-modal");
     contentEl.empty();
     this.setTitle(this.titleText);
-    contentEl.createEl("p", { text: this.bodyText });
+    const bodyEl = contentEl.createDiv({ cls: "move-to-new-folder-confirmation-body" });
+    bodyEl.createEl("p", {
+      text: this.bodyText,
+      cls: "move-to-new-folder-confirmation-text"
+    });
     const actionsEl = contentEl.createDiv({ cls: "move-to-new-folder-actions" });
-    const cancelButton = actionsEl.createEl("button", {
-      text: "Cancel",
+    const backButton = actionsEl.createEl("button", {
+      text: this.backText,
       cls: "mod-muted"
     });
-    cancelButton.type = "button";
-    cancelButton.addEventListener("click", () => this.closeWithResult(false));
+    backButton.type = "button";
+    backButton.addEventListener("click", () => this.closeWithResult("back"));
     const confirmButton = actionsEl.createEl("button", {
       text: this.confirmText,
       cls: "mod-cta"
     });
     confirmButton.type = "button";
-    confirmButton.addEventListener("click", () => this.closeWithResult(true));
+    confirmButton.addEventListener("click", () => this.closeWithResult("confirm"));
   }
   onClose() {
     if (!this.didResolve) {
-      this.onCloseResolve(false);
+      this.onCloseResolve("close");
     }
+    this.modalEl.removeClass("move-to-new-folder-confirmation-modal");
     this.contentEl.empty();
   }
-  closeWithResult(confirmed) {
+  closeWithResult(result) {
     this.didResolve = true;
-    this.onCloseResolve(confirmed);
+    this.onCloseResolve(result);
     this.close();
   }
 };
@@ -172,7 +179,6 @@ function validateFolderNameForCurrentPlatform(folderName) {
 }
 
 // src/modals/moveToNewFolderModal.ts
-var TEMP_BUILD_MARKER = 11;
 var MoveToNewFolderModal = class extends import_obsidian3.Modal {
   constructor(app, initialPath, targetKind, onCloseResolve) {
     super(app);
@@ -202,7 +208,7 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
     }
     contentEl.empty();
     this.setTitle(
-      this.targetKind === "folder" ? `Move folder to new folder ${TEMP_BUILD_MARKER}` : `Move file to new folder ${TEMP_BUILD_MARKER}`
+      this.targetKind === "folder" ? "Move folder to new folder" : "Move file to new folder"
     );
     const layoutEl = contentEl.createDiv({ cls: "move-to-new-folder-layout" });
     const nameSectionEl = layoutEl.createDiv({
@@ -577,73 +583,90 @@ var MoveToNewFolderPlugin = class extends import_obsidian5.Plugin {
   }
   async runFileMoveFlow(file, leaf) {
     var _a, _b;
-    const parentDefaultPath = this.settings.defaultToCurrentParent ? (_b = (_a = file.parent) == null ? void 0 : _a.path) != null ? _b : "" : "";
-    const moveTarget = await this.promptForMoveTarget(parentDefaultPath, "file");
-    if (moveTarget === null) {
+    let initialPath = this.settings.defaultToCurrentParent ? (_b = (_a = file.parent) == null ? void 0 : _a.path) != null ? _b : "" : "";
+    while (true) {
+      const moveTarget = await this.promptForMoveTarget(initialPath, "file");
+      if (moveTarget === null) {
+        return;
+      }
+      initialPath = moveTarget.parentPath;
+      const targetFolderPath = (0, import_obsidian5.normalizePath)(
+        moveTarget.parentPath.length > 0 ? `${moveTarget.parentPath}/${moveTarget.folderName}` : moveTarget.folderName
+      );
+      const targetFolder = await this.ensureTargetFolder(targetFolderPath, "file");
+      if (targetFolder === "back") {
+        continue;
+      }
+      if (!targetFolder) {
+        return;
+      }
+      const targetFilePath = (0, import_obsidian5.normalizePath)(`${targetFolder.path}/${file.name}`);
+      const existingDestination = this.app.vault.getAbstractFileByPath(targetFilePath);
+      if (existingDestination && existingDestination.path !== file.path) {
+        new import_obsidian5.Notice(`Move canceled: file already exists at "${targetFilePath}".`);
+        return;
+      }
+      try {
+        await this.app.fileManager.renameFile(file, targetFilePath);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        new import_obsidian5.Notice(`Could not move note: ${message}`);
+        return;
+      }
+      const movedFile = this.app.vault.getAbstractFileByPath(targetFilePath);
+      if (movedFile instanceof import_obsidian5.TFile) {
+        await this.openMovedFile(movedFile, leaf);
+        new import_obsidian5.Notice(`Moved to "${targetFolderPath}".`);
+        return;
+      }
+      new import_obsidian5.Notice(`Move completed, but could not reopen "${targetFilePath}".`);
       return;
     }
-    const targetFolderPath = (0, import_obsidian5.normalizePath)(
-      moveTarget.parentPath.length > 0 ? `${moveTarget.parentPath}/${moveTarget.folderName}` : moveTarget.folderName
-    );
-    const targetFolder = await this.ensureTargetFolder(targetFolderPath);
-    if (!targetFolder) {
-      return;
-    }
-    const targetFilePath = (0, import_obsidian5.normalizePath)(`${targetFolder.path}/${file.name}`);
-    const existingDestination = this.app.vault.getAbstractFileByPath(targetFilePath);
-    if (existingDestination && existingDestination.path !== file.path) {
-      new import_obsidian5.Notice(`Move canceled: file already exists at "${targetFilePath}".`);
-      return;
-    }
-    try {
-      await this.app.fileManager.renameFile(file, targetFilePath);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      new import_obsidian5.Notice(`Could not move note: ${message}`);
-      return;
-    }
-    const movedFile = this.app.vault.getAbstractFileByPath(targetFilePath);
-    if (movedFile instanceof import_obsidian5.TFile) {
-      await this.openMovedFile(movedFile, leaf);
-      new import_obsidian5.Notice(`Moved to "${targetFolderPath}".`);
-      return;
-    }
-    new import_obsidian5.Notice(`Move completed, but could not reopen "${targetFilePath}".`);
   }
   async runFolderMoveFlow(folder) {
     var _a, _b;
-    const currentParentPath = (_b = (_a = folder.parent) == null ? void 0 : _a.path) != null ? _b : "";
-    const moveTarget = await this.promptForMoveTarget(currentParentPath, "folder");
-    if (moveTarget === null) {
+    let initialPath = (_b = (_a = folder.parent) == null ? void 0 : _a.path) != null ? _b : "";
+    while (true) {
+      const moveTarget = await this.promptForMoveTarget(initialPath, "folder");
+      if (moveTarget === null) {
+        return;
+      }
+      initialPath = moveTarget.parentPath;
+      const targetFolderPath = (0, import_obsidian5.normalizePath)(
+        moveTarget.parentPath.length > 0 ? `${moveTarget.parentPath}/${moveTarget.folderName}` : moveTarget.folderName
+      );
+      const targetContainer = await this.ensureTargetFolder(targetFolderPath, "folder");
+      if (targetContainer === "back") {
+        continue;
+      }
+      if (!targetContainer) {
+        return;
+      }
+      const targetChildPath = (0, import_obsidian5.normalizePath)(`${targetContainer.path}/${folder.name}`);
+      const existingDestination = this.app.vault.getAbstractFileByPath(targetChildPath);
+      if (existingDestination && existingDestination.path !== folder.path) {
+        new import_obsidian5.Notice(`Move canceled: folder already exists at "${targetChildPath}".`);
+        return;
+      }
+      try {
+        await this.app.fileManager.renameFile(folder, targetChildPath);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        new import_obsidian5.Notice(`Could not move folder: ${message}`);
+        return;
+      }
+      new import_obsidian5.Notice(`Moved folder to "${targetFolderPath}".`);
       return;
     }
-    const targetFolderPath = (0, import_obsidian5.normalizePath)(
-      moveTarget.parentPath.length > 0 ? `${moveTarget.parentPath}/${moveTarget.folderName}` : moveTarget.folderName
-    );
-    const targetContainer = await this.ensureTargetFolder(targetFolderPath);
-    if (!targetContainer) {
-      return;
-    }
-    const targetChildPath = (0, import_obsidian5.normalizePath)(`${targetContainer.path}/${folder.name}`);
-    const existingDestination = this.app.vault.getAbstractFileByPath(targetChildPath);
-    if (existingDestination && existingDestination.path !== folder.path) {
-      new import_obsidian5.Notice(`Move canceled: folder already exists at "${targetChildPath}".`);
-      return;
-    }
-    try {
-      await this.app.fileManager.renameFile(folder, targetChildPath);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      new import_obsidian5.Notice(`Could not move folder: ${message}`);
-      return;
-    }
-    new import_obsidian5.Notice(`Moved folder to "${targetFolderPath}".`);
   }
-  async ensureTargetFolder(targetFolderPath) {
+  async ensureTargetFolder(targetFolderPath, targetKind) {
     const existing = this.app.vault.getAbstractFileByPath(targetFolderPath);
     if (existing instanceof import_obsidian5.TFolder) {
-      const confirmed = await this.confirmReuseFolder(targetFolderPath);
-      if (!confirmed) {
+      const confirmation = await this.confirmReuseFolder(targetFolderPath, targetKind);
+      if (confirmation === "back") {
+        return "back";
+      }
+      if (confirmation !== "confirm") {
         return null;
       }
       return existing;
@@ -670,13 +693,14 @@ var MoveToNewFolderPlugin = class extends import_obsidian5.Plugin {
     new import_obsidian5.Notice(`Folder creation succeeded but "${targetFolderPath}" is unavailable.`);
     return null;
   }
-  async confirmReuseFolder(folderPath) {
+  async confirmReuseFolder(folderPath, targetKind) {
     return new Promise((resolve) => {
       const modal = new ConfirmationModal(
         this.app,
         "Folder already exists",
         `Use existing folder "${folderPath}"?`,
-        "Use folder",
+        "Back",
+        targetKind === "folder" ? "Move folder" : "Move file",
         resolve
       );
       modal.open();

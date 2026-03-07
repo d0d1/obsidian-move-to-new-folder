@@ -94,3 +94,4 @@ The main blockers are:
 
 - Folder move support exists, but the command-palette path for folders depends on available folder context. The file explorer context menu is the strongest supported path for folder moves.
 - Initial focus behavior in the move modal still has a documented unresolved quirk. See [docs/investigations/focus.md](/home/dbhul/code/obsidian-move-to-new-folder/docs/investigations/focus.md).
+- Android keyboard behavior for `New folder name` still has a documented unresolved issue. See [docs/investigations/mobile-keyboard.md](/home/dbhul/code/obsidian-move-to-new-folder/docs/investigations/mobile-keyboard.md).

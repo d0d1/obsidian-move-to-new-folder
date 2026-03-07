@@ -10,7 +10,7 @@ import {
   normalizePath,
 } from "obsidian";
 
-import { ConfirmationModal } from "./modals/confirmationModal";
+import { ConfirmationModal, type ConfirmationModalResult } from "./modals/confirmationModal";
 import {
   MoveToNewFolderModal,
   type MoveTargetKind,
@@ -107,90 +107,112 @@ export default class MoveToNewFolderPlugin extends Plugin {
   }
 
   private async runFileMoveFlow(file: TFile, leaf?: WorkspaceLeaf): Promise<void> {
-    const parentDefaultPath = this.settings.defaultToCurrentParent ? file.parent?.path ?? "" : "";
-    const moveTarget = await this.promptForMoveTarget(parentDefaultPath, "file");
-    if (moveTarget === null) {
+    let initialPath = this.settings.defaultToCurrentParent ? file.parent?.path ?? "" : "";
+
+    while (true) {
+      const moveTarget = await this.promptForMoveTarget(initialPath, "file");
+      if (moveTarget === null) {
+        return;
+      }
+
+      initialPath = moveTarget.parentPath;
+      const targetFolderPath = normalizePath(
+        moveTarget.parentPath.length > 0
+          ? `${moveTarget.parentPath}/${moveTarget.folderName}`
+          : moveTarget.folderName,
+      );
+
+      const targetFolder = await this.ensureTargetFolder(targetFolderPath, "file");
+      if (targetFolder === "back") {
+        continue;
+      }
+      if (!targetFolder) {
+        return;
+      }
+
+      const targetFilePath = normalizePath(`${targetFolder.path}/${file.name}`);
+      const existingDestination = this.app.vault.getAbstractFileByPath(targetFilePath);
+      if (existingDestination && existingDestination.path !== file.path) {
+        new Notice(`Move canceled: file already exists at "${targetFilePath}".`);
+        return;
+      }
+
+      try {
+        await this.app.fileManager.renameFile(file, targetFilePath);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        new Notice(`Could not move note: ${message}`);
+        return;
+      }
+
+      const movedFile = this.app.vault.getAbstractFileByPath(targetFilePath);
+      if (movedFile instanceof TFile) {
+        await this.openMovedFile(movedFile, leaf);
+        new Notice(`Moved to "${targetFolderPath}".`);
+        return;
+      }
+
+      new Notice(`Move completed, but could not reopen "${targetFilePath}".`);
       return;
     }
-
-    const targetFolderPath = normalizePath(
-      moveTarget.parentPath.length > 0
-        ? `${moveTarget.parentPath}/${moveTarget.folderName}`
-        : moveTarget.folderName,
-    );
-
-    const targetFolder = await this.ensureTargetFolder(targetFolderPath);
-    if (!targetFolder) {
-      return;
-    }
-
-    const targetFilePath = normalizePath(`${targetFolder.path}/${file.name}`);
-    const existingDestination = this.app.vault.getAbstractFileByPath(targetFilePath);
-    if (existingDestination && existingDestination.path !== file.path) {
-      new Notice(`Move canceled: file already exists at "${targetFilePath}".`);
-      return;
-    }
-
-    try {
-      await this.app.fileManager.renameFile(file, targetFilePath);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      new Notice(`Could not move note: ${message}`);
-      return;
-    }
-
-    const movedFile = this.app.vault.getAbstractFileByPath(targetFilePath);
-    if (movedFile instanceof TFile) {
-      await this.openMovedFile(movedFile, leaf);
-      new Notice(`Moved to "${targetFolderPath}".`);
-      return;
-    }
-
-    new Notice(`Move completed, but could not reopen "${targetFilePath}".`);
   }
 
   private async runFolderMoveFlow(folder: TFolder): Promise<void> {
-    const currentParentPath = folder.parent?.path ?? "";
-    const moveTarget = await this.promptForMoveTarget(currentParentPath, "folder");
-    if (moveTarget === null) {
+    let initialPath = folder.parent?.path ?? "";
+
+    while (true) {
+      const moveTarget = await this.promptForMoveTarget(initialPath, "folder");
+      if (moveTarget === null) {
+        return;
+      }
+
+      initialPath = moveTarget.parentPath;
+      const targetFolderPath = normalizePath(
+        moveTarget.parentPath.length > 0
+          ? `${moveTarget.parentPath}/${moveTarget.folderName}`
+          : moveTarget.folderName,
+      );
+
+      const targetContainer = await this.ensureTargetFolder(targetFolderPath, "folder");
+      if (targetContainer === "back") {
+        continue;
+      }
+      if (!targetContainer) {
+        return;
+      }
+
+      const targetChildPath = normalizePath(`${targetContainer.path}/${folder.name}`);
+      const existingDestination = this.app.vault.getAbstractFileByPath(targetChildPath);
+      if (existingDestination && existingDestination.path !== folder.path) {
+        new Notice(`Move canceled: folder already exists at "${targetChildPath}".`);
+        return;
+      }
+
+      try {
+        await this.app.fileManager.renameFile(folder, targetChildPath);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        new Notice(`Could not move folder: ${message}`);
+        return;
+      }
+
+      new Notice(`Moved folder to "${targetFolderPath}".`);
       return;
     }
-
-    const targetFolderPath = normalizePath(
-      moveTarget.parentPath.length > 0
-        ? `${moveTarget.parentPath}/${moveTarget.folderName}`
-        : moveTarget.folderName,
-    );
-
-    const targetContainer = await this.ensureTargetFolder(targetFolderPath);
-    if (!targetContainer) {
-      return;
-    }
-
-    const targetChildPath = normalizePath(`${targetContainer.path}/${folder.name}`);
-    const existingDestination = this.app.vault.getAbstractFileByPath(targetChildPath);
-    if (existingDestination && existingDestination.path !== folder.path) {
-      new Notice(`Move canceled: folder already exists at "${targetChildPath}".`);
-      return;
-    }
-
-    try {
-      await this.app.fileManager.renameFile(folder, targetChildPath);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      new Notice(`Could not move folder: ${message}`);
-      return;
-    }
-
-    new Notice(`Moved folder to "${targetFolderPath}".`);
   }
 
-  private async ensureTargetFolder(targetFolderPath: string): Promise<TFolder | null> {
+  private async ensureTargetFolder(
+    targetFolderPath: string,
+    targetKind: MoveTargetKind,
+  ): Promise<TFolder | null | "back"> {
     const existing = this.app.vault.getAbstractFileByPath(targetFolderPath);
 
     if (existing instanceof TFolder) {
-      const confirmed = await this.confirmReuseFolder(targetFolderPath);
-      if (!confirmed) {
+      const confirmation = await this.confirmReuseFolder(targetFolderPath, targetKind);
+      if (confirmation === "back") {
+        return "back";
+      }
+      if (confirmation !== "confirm") {
         return null;
       }
       return existing;
@@ -223,13 +245,17 @@ export default class MoveToNewFolderPlugin extends Plugin {
     return null;
   }
 
-  private async confirmReuseFolder(folderPath: string): Promise<boolean> {
+  private async confirmReuseFolder(
+    folderPath: string,
+    targetKind: MoveTargetKind,
+  ): Promise<ConfirmationModalResult> {
     return new Promise((resolve) => {
       const modal = new ConfirmationModal(
         this.app,
         "Folder already exists",
         `Use existing folder "${folderPath}"?`,
-        "Use folder",
+        "Back",
+        targetKind === "folder" ? "Move folder" : "Move file",
         resolve,
       );
       modal.open();

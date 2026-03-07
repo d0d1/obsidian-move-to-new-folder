@@ -60,6 +60,7 @@ Folder moves are primarily supported from the file explorer context menu.
 - Release readiness: [docs/release-readiness.md](docs/release-readiness.md)
 - Development standards: [docs/development-standards.md](docs/development-standards.md)
 - Focus investigation history: [docs/investigations/focus.md](docs/investigations/focus.md)
+- Mobile keyboard investigation history: [docs/investigations/mobile-keyboard.md](docs/investigations/mobile-keyboard.md)
 - Contributing: [CONTRIBUTING.md](CONTRIBUTING.md)
 - Agent guidance: [AGENTS.md](AGENTS.md)
 
