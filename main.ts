@@ -410,6 +410,7 @@ class MoveToNewFolderSettingTab extends PluginSettingTab {
 
 export default class MoveToNewFolderPlugin extends Plugin {
   settings: MoveToNewFolderSettings = DEFAULT_SETTINGS;
+  private readonly moveMenuSection = "file";
 
   async onload(): Promise<void> {
     await this.loadSettings();
@@ -456,6 +457,7 @@ export default class MoveToNewFolderPlugin extends Plugin {
 
         menu.addItem((item) => {
           item
+            .setSection(this.moveMenuSection)
             .setTitle("Move note to new folder")
             .setIcon("folder-plus")
             .onClick(() => {

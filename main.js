@@ -322,6 +322,7 @@ var MoveToNewFolderPlugin = class extends import_obsidian.Plugin {
   constructor() {
     super(...arguments);
     this.settings = DEFAULT_SETTINGS;
+    this.moveMenuSection = "file";
   }
   async onload() {
     await this.loadSettings();
@@ -358,7 +359,7 @@ var MoveToNewFolderPlugin = class extends import_obsidian.Plugin {
           return;
         }
         menu.addItem((item) => {
-          item.setTitle("Move note to new folder").setIcon("folder-plus").onClick(() => {
+          item.setSection(this.moveMenuSection).setTitle("Move note to new folder").setIcon("folder-plus").onClick(() => {
             void this.runMoveFlow(file, leaf);
           });
         });
