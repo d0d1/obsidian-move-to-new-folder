@@ -28,6 +28,13 @@ jobs:
       - name: Build plugin
         run: npm run build
 
+      - name: Create release zip
+        run: |
+          mkdir -p release
+          cp manifest.json main.js styles.css release/
+          cd release
+          zip -r "../move-to-new-folder-${{ github.event.release.tag_name }}.zip" .
+
       - name: Upload release assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -37,4 +44,5 @@ jobs:
             main.js \
             styles.css \
             versions.json \
+            move-to-new-folder-${{ github.event.release.tag_name }}.zip \
             --clobber

@@ -51,9 +51,9 @@ This plugin is currently in beta and can be installed through BRAT before offici
 
 If you prefer not to use BRAT, you can install the plugin from the latest GitHub release:
 
-1. Download `main.js`, `manifest.json`, and `styles.css` from the latest release.
+1. Download `move-to-new-folder-<version>.zip` from the latest release.
 2. Create the folder `.obsidian/plugins/move-to-new-folder/` in your vault if it does not already exist.
-3. Copy the downloaded files into that folder.
+3. Extract the ZIP contents into that folder.
 4. Enable **Move to New Folder** in Obsidian.
 
 ## Privacy and external services
