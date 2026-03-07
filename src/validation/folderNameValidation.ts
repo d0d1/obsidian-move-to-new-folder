@@ -51,7 +51,7 @@ export function validateFolderNameForCurrentPlatform(folderName: string): Folder
   if (!trimmedName) {
     return {
       isValid: false,
-      message: "Folder name cannot be empty.",
+      message: null,
     };
   }
 

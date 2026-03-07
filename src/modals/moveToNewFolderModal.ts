@@ -2,7 +2,7 @@ import { App, Modal, Notice, Platform, TFolder } from "obsidian";
 
 import { validateFolderNameForCurrentPlatform, type FolderNameValidationResult } from "../validation/folderNameValidation";
 
-const TEMP_BUILD_MARKER = 3;
+const TEMP_BUILD_MARKER = 10;
 
 export interface MoveToNewFolderModalResult {
   parentPath: string;
@@ -231,6 +231,7 @@ export class MoveToNewFolderModal extends Modal {
       const shouldShowError = !validation.isValid && (this.hasEditedFolderName || this.hasTriedSubmit);
       validationEl.toggleClass("is-invalid", shouldShowError);
       validationEl.setText(shouldShowError && validation.message ? validation.message : "");
+      moveButton.disabled = !validation.isValid;
       return validation;
     };
 
@@ -279,6 +280,7 @@ export class MoveToNewFolderModal extends Modal {
     moveButton.addEventListener("click", submit);
 
     render("initial");
+    updateValidationState();
     if (!Platform.isMobile) {
       nameInput.focus();
       nameInput.select();

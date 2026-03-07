@@ -110,7 +110,7 @@ function validateFolderNameForCurrentPlatform(folderName) {
   if (!trimmedName) {
     return {
       isValid: false,
-      message: "Folder name cannot be empty."
+      message: null
     };
   }
   if (trimmedName.startsWith(".")) {
@@ -172,7 +172,7 @@ function validateFolderNameForCurrentPlatform(folderName) {
 }
 
 // src/modals/moveToNewFolderModal.ts
-var TEMP_BUILD_MARKER = 3;
+var TEMP_BUILD_MARKER = 10;
 var MoveToNewFolderModal = class extends import_obsidian3.Modal {
   constructor(app, initialPath, targetKind, onCloseResolve) {
     super(app);
@@ -348,6 +348,7 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
       const shouldShowError = !validation.isValid && (this.hasEditedFolderName || this.hasTriedSubmit);
       validationEl.toggleClass("is-invalid", shouldShowError);
       validationEl.setText(shouldShowError && validation.message ? validation.message : "");
+      moveButton.disabled = !validation.isValid;
       return validation;
     };
     nameInput.addEventListener("input", () => {
@@ -388,6 +389,7 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
     };
     moveButton.addEventListener("click", submit);
     render("initial");
+    updateValidationState();
     if (!import_obsidian3.Platform.isMobile) {
       nameInput.focus();
       nameInput.select();
