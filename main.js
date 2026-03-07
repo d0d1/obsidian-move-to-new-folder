@@ -286,9 +286,17 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
         if (folderPath === this.selectedPath) {
           button.addClass("is-selected");
         }
+        button.addEventListener("mousedown", (event) => {
+          event.preventDefault();
+        });
         button.addEventListener("click", () => {
+          const selectedPathIndex2 = filtered.indexOf(folderPath);
+          if (selectedPathIndex2 >= 0) {
+            this.selectedIndex = selectedPathIndex2;
+          }
           this.selectedPath = folderPath;
-          render("preserve");
+          updateSelectedParent();
+          this.refreshSelection(listEl, filtered, "preserve");
         });
         button.addEventListener("mouseenter", () => {
           button.addClass("is-hovered");

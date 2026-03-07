@@ -148,9 +148,18 @@ export class MoveToNewFolderModal extends Modal {
           button.addClass("is-selected");
         }
 
+        button.addEventListener("mousedown", (event) => {
+          event.preventDefault();
+        });
+
         button.addEventListener("click", () => {
+          const selectedPathIndex = filtered.indexOf(folderPath);
+          if (selectedPathIndex >= 0) {
+            this.selectedIndex = selectedPathIndex;
+          }
           this.selectedPath = folderPath;
-          render("preserve");
+          updateSelectedParent();
+          this.refreshSelection(listEl, filtered, "preserve");
         });
 
         button.addEventListener("mouseenter", () => {
