@@ -1,111 +1,68 @@
 # Move to New Folder
 
-`Move to New Folder` is an Obsidian community plugin that improves the workflow for moving a file or folder into a newly created folder.
+`Move to New Folder` is an Obsidian community plugin that moves a file or folder into a newly created folder without requiring you to type the full destination path.
 
-Instead of typing a full destination path manually, it uses a single focused modal:
+## What it does
 
-1. Choose an existing parent folder from a searchable picker.
-2. Enter the new child folder name in the same dialog.
+- Adds `Move file to new folder...` for notes
+- Adds `Move folder to new folder...` for folders
+- Lets you choose a parent folder from a searchable picker
+- Creates the new child folder and moves the target safely with Obsidian APIs
+- Preserves Obsidian's normal link-update behavior when moving files
 
-Then the plugin creates the folder (if needed) and moves the target safely.
-
-## Features
-
-- Command palette action: `Move file to new folder...`
-- Command palette action: `Move folder to new folder...`
-- File explorer context menu action: `Move file to new folder...`
-- File explorer context menu action: `Move folder to new folder...`
-- File menu support for open note tabs when Obsidian emits `file-menu` for that source
-- Searchable parent-folder picker with keyboard and mouse navigation
-- Single modal for parent-folder selection and new-folder naming
-- Inline folder-name validation based on the current Obsidian platform
-- New-folder conflict handling:
-  - If folder exists, prompt to reuse or cancel
-  - If a file exists at folder path, stop with an error notice
-- File conflict handling:
-  - Never overwrites an existing destination note
-- Folder conflict handling:
-  - Never overwrites an existing destination folder
-- Safe move implementation through Obsidian `FileManager.renameFile` so Obsidian link behavior is preserved according to user preferences
-- Setting: default picker selection to current note parent folder
-
-## Platform support
-
-- `isDesktopOnly` is set to `false`
-- Designed to support desktop and mobile
-- Primary test targets: Windows and Android
-- Other Obsidian-supported platforms should work, but are not fully validated yet
-
-## Installation (manual)
-
-1. Build the plugin:
-   - `npm install`
-   - `npm run build`
-2. Copy these files to your vault plugin folder:
-   - `main.js`
-   - `manifest.json`
-   - `styles.css`
-3. Enable **Move to New Folder** in Obsidian community plugins.
-
-## Usage
+## How to use it
 
 ### File explorer
 
-1. Right-click a markdown note.
-2. Choose `Move file to new folder...`.
-3. Pick a parent folder.
+1. Right-click a note or folder.
+2. Choose `Move file to new folder...` or `Move folder to new folder...`.
+3. Pick the parent folder.
 4. Enter the new folder name.
-5. Confirm.
-
-6. Right-click a folder.
-7. Choose `Move folder to new folder...`.
-8. Pick a parent folder.
-9. Enter the new folder name.
-10. Confirm.
+5. Confirm the move.
 
 ### Command palette
 
-1. Open the target markdown note.
+1. Open a note.
 2. Run `Move file to new folder...`.
 3. Complete the same modal flow.
 
-4. For folders, use `Move folder to new folder...` when a folder context is available.
+Folder moves are primarily supported from the file explorer context menu.
 
 ## Settings
 
-- **Default parent to current note folder**
-  - When enabled, parent folder picker starts from the current note's parent.
-  - When disabled, it defaults to vault root.
+- **Default parent to current note folder**: start the picker from the active note's parent instead of vault root
 
-## Development
+## Platform support
 
-- Build: `npm run build`
-- Watch mode: `npm run dev`
+- `isDesktopOnly` is `false`
+- Designed for desktop and mobile
+- Tested primarily on Windows and Android
+- Other supported Obsidian platforms may work but are not fully validated yet
 
-Release assets:
+## Manual installation
 
-- `main.js`
-- `manifest.json`
-- `styles.css` (optional but provided)
+1. Run `npm install`
+2. Run `npm run build`
+3. Copy `main.js`, `manifest.json`, and `styles.css` into your vault's `.obsidian/plugins/move-to-new-folder/` folder
+4. Enable **Move to New Folder** in Obsidian
 
 ## Privacy and external services
 
 - No telemetry
 - No analytics
 - No network access
-- No account required
-- No payments/subscriptions
+- No account requirement
+- No payments or subscriptions
 - No external service dependencies at runtime
 
-## Known issue notes
+## Additional docs
 
-- Initial focus in the move modal is documented in [docs/investigations/focus.md](docs/investigations/focus.md). Several focus-workaround approaches were tried and intentionally reverted because they were too brittle.
-- Release-readiness status is tracked in [docs/release-readiness.md](docs/release-readiness.md).
+- Release readiness: [docs/release-readiness.md](docs/release-readiness.md)
+- Development standards: [docs/development-standards.md](docs/development-standards.md)
+- Focus investigation history: [docs/investigations/focus.md](docs/investigations/focus.md)
+- Contributing: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Agent guidance: [AGENTS.md](AGENTS.md)
 
 ## License
 
-This project is licensed under `GPL-3.0-only`. See [LICENSE](LICENSE).
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md).
+`GPL-3.0-only`. See [LICENSE](LICENSE).
