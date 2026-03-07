@@ -61,6 +61,7 @@ Folder moves are primarily supported from the file explorer context menu.
 - Development standards: [docs/development-standards.md](docs/development-standards.md)
 - Focus investigation history: [docs/investigations/focus.md](docs/investigations/focus.md)
 - Mobile keyboard investigation history: [docs/investigations/mobile-keyboard.md](docs/investigations/mobile-keyboard.md)
+- Performance investigation history: [docs/investigations/performance.md](docs/investigations/performance.md)
 - Contributing: [CONTRIBUTING.md](CONTRIBUTING.md)
 - Agent guidance: [AGENTS.md](AGENTS.md)
 

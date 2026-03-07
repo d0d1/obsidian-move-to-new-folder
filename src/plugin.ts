@@ -21,6 +21,7 @@ import { DEFAULT_SETTINGS, MoveToNewFolderSettingTab, type MoveToNewFolderSettin
 export default class MoveToNewFolderPlugin extends Plugin {
   settings: MoveToNewFolderSettings = DEFAULT_SETTINGS;
   private readonly moveMenuSection = "action";
+  private folderPathsCache: string[] | null = null;
 
   async onload(): Promise<void> {
     await this.loadSettings();
@@ -64,6 +65,8 @@ export default class MoveToNewFolderPlugin extends Plugin {
     this.app.workspace.onLayoutReady(() => {
       this.registerFileMenuAction();
     });
+
+    this.registerVaultCacheInvalidation();
   }
 
   async loadSettings(): Promise<void> {
@@ -267,11 +270,37 @@ export default class MoveToNewFolderPlugin extends Plugin {
     targetKind: MoveTargetKind,
   ): Promise<MoveToNewFolderModalResult | null> {
     return new Promise((resolve) => {
-      const modal = new MoveToNewFolderModal(this.app, initialPath, targetKind, (result) => {
+      const modal = new MoveToNewFolderModal(this.app, this.getFolderPaths(), initialPath, targetKind, (result) => {
         resolve(result);
       });
       modal.open();
     });
+  }
+
+  private registerVaultCacheInvalidation(): void {
+    this.registerEvent(this.app.vault.on("create", () => this.invalidateFolderPathsCache()));
+    this.registerEvent(this.app.vault.on("delete", () => this.invalidateFolderPathsCache()));
+    this.registerEvent(this.app.vault.on("rename", () => this.invalidateFolderPathsCache()));
+  }
+
+  private getFolderPaths(): string[] {
+    if (this.folderPathsCache) {
+      return this.folderPathsCache;
+    }
+
+    const folderSet = new Set<string>([""]);
+    for (const item of this.app.vault.getAllLoadedFiles()) {
+      if (item instanceof TFolder) {
+        folderSet.add(item.path);
+      }
+    }
+
+    this.folderPathsCache = Array.from(folderSet).sort((a, b) => a.localeCompare(b));
+    return this.folderPathsCache;
+  }
+
+  private invalidateFolderPathsCache(): void {
+    this.folderPathsCache = null;
   }
 
   private async openMovedFile(file: TFile, leaf?: WorkspaceLeaf): Promise<void> {

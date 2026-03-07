@@ -1,4 +1,4 @@
-import { App, Modal, Notice, Platform, TFolder } from "obsidian";
+import { App, Modal, Notice, Platform } from "obsidian";
 
 import { validateFolderNameForCurrentPlatform, type FolderNameValidationResult } from "../validation/folderNameValidation";
 
@@ -25,6 +25,7 @@ export class MoveToNewFolderModal extends Modal {
 
   constructor(
     app: App,
+    folderPaths: string[],
     initialPath: string,
     targetKind: MoveTargetKind,
     onCloseResolve: (result: MoveToNewFolderModalResult | null) => void,
@@ -33,7 +34,7 @@ export class MoveToNewFolderModal extends Modal {
     this.selectedPath = initialPath;
     this.targetKind = targetKind;
     this.onCloseResolve = onCloseResolve;
-    this.folderPaths = this.collectFolderPaths();
+    this.folderPaths = folderPaths;
 
     if (!this.folderPaths.includes(this.selectedPath)) {
       this.selectedPath = "";
@@ -291,18 +292,6 @@ export class MoveToNewFolderModal extends Modal {
     }
     this.modalEl.removeClass("move-to-new-folder-modal", "move-to-new-folder-modal-mobile");
     this.contentEl.empty();
-  }
-
-  private collectFolderPaths(): string[] {
-    const folderSet = new Set<string>([""]);
-
-    for (const item of this.app.vault.getAllLoadedFiles()) {
-      if (item instanceof TFolder) {
-        folderSet.add(item.path);
-      }
-    }
-
-    return Array.from(folderSet).sort((a, b) => a.localeCompare(b));
   }
 
   private getFilteredFolders(): string[] {

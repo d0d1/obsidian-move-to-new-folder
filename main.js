@@ -180,7 +180,7 @@ function validateFolderNameForCurrentPlatform(folderName) {
 
 // src/modals/moveToNewFolderModal.ts
 var MoveToNewFolderModal = class extends import_obsidian3.Modal {
-  constructor(app, initialPath, targetKind, onCloseResolve) {
+  constructor(app, folderPaths, initialPath, targetKind, onCloseResolve) {
     super(app);
     this.searchValue = "";
     this.selectedIndex = 0;
@@ -193,7 +193,7 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
     this.selectedPath = initialPath;
     this.targetKind = targetKind;
     this.onCloseResolve = onCloseResolve;
-    this.folderPaths = this.collectFolderPaths();
+    this.folderPaths = folderPaths;
     if (!this.folderPaths.includes(this.selectedPath)) {
       this.selectedPath = "";
     }
@@ -408,15 +408,6 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
     this.modalEl.removeClass("move-to-new-folder-modal", "move-to-new-folder-modal-mobile");
     this.contentEl.empty();
   }
-  collectFolderPaths() {
-    const folderSet = /* @__PURE__ */ new Set([""]);
-    for (const item of this.app.vault.getAllLoadedFiles()) {
-      if (item instanceof import_obsidian3.TFolder) {
-        folderSet.add(item.path);
-      }
-    }
-    return Array.from(folderSet).sort((a, b) => a.localeCompare(b));
-  }
   getFilteredFolders() {
     if (!this.searchValue) {
       return this.folderPaths;
@@ -517,6 +508,7 @@ var MoveToNewFolderPlugin = class extends import_obsidian5.Plugin {
     super(...arguments);
     this.settings = DEFAULT_SETTINGS;
     this.moveMenuSection = "action";
+    this.folderPathsCache = null;
   }
   async onload() {
     await this.loadSettings();
@@ -552,6 +544,7 @@ var MoveToNewFolderPlugin = class extends import_obsidian5.Plugin {
     this.app.workspace.onLayoutReady(() => {
       this.registerFileMenuAction();
     });
+    this.registerVaultCacheInvalidation();
   }
   async loadSettings() {
     const loaded = await this.loadData();
@@ -708,11 +701,32 @@ var MoveToNewFolderPlugin = class extends import_obsidian5.Plugin {
   }
   async promptForMoveTarget(initialPath, targetKind) {
     return new Promise((resolve) => {
-      const modal = new MoveToNewFolderModal(this.app, initialPath, targetKind, (result) => {
+      const modal = new MoveToNewFolderModal(this.app, this.getFolderPaths(), initialPath, targetKind, (result) => {
         resolve(result);
       });
       modal.open();
     });
+  }
+  registerVaultCacheInvalidation() {
+    this.registerEvent(this.app.vault.on("create", () => this.invalidateFolderPathsCache()));
+    this.registerEvent(this.app.vault.on("delete", () => this.invalidateFolderPathsCache()));
+    this.registerEvent(this.app.vault.on("rename", () => this.invalidateFolderPathsCache()));
+  }
+  getFolderPaths() {
+    if (this.folderPathsCache) {
+      return this.folderPathsCache;
+    }
+    const folderSet = /* @__PURE__ */ new Set([""]);
+    for (const item of this.app.vault.getAllLoadedFiles()) {
+      if (item instanceof import_obsidian5.TFolder) {
+        folderSet.add(item.path);
+      }
+    }
+    this.folderPathsCache = Array.from(folderSet).sort((a, b) => a.localeCompare(b));
+    return this.folderPathsCache;
+  }
+  invalidateFolderPathsCache() {
+    this.folderPathsCache = null;
   }
   async openMovedFile(file, leaf) {
     const targetLeaf = leaf != null ? leaf : this.app.workspace.getMostRecentLeaf();
