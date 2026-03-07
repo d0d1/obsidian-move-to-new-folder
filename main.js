@@ -172,6 +172,7 @@ function validateFolderNameForCurrentPlatform(folderName) {
 }
 
 // src/modals/moveToNewFolderModal.ts
+var TEMP_BUILD_MARKER = 3;
 var MoveToNewFolderModal = class extends import_obsidian3.Modal {
   constructor(app, initialPath, targetKind, onCloseResolve) {
     super(app);
@@ -200,7 +201,9 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
       this.modalEl.addClass("move-to-new-folder-modal-mobile");
     }
     contentEl.empty();
-    this.setTitle(this.targetKind === "folder" ? "Move folder to new folder" : "Move file to new folder");
+    this.setTitle(
+      this.targetKind === "folder" ? `Move folder to new folder ${TEMP_BUILD_MARKER}` : `Move file to new folder ${TEMP_BUILD_MARKER}`
+    );
     const layoutEl = contentEl.createDiv({ cls: "move-to-new-folder-layout" });
     const nameSectionEl = layoutEl.createDiv({
       cls: "move-to-new-folder-section move-to-new-folder-section-name"
@@ -444,10 +447,16 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
     if (!selectedButton) {
       return;
     }
-    window.requestAnimationFrame(() => {
-      const targetTop = Math.max(selectedButton.offsetTop - 8, 0);
-      listEl.scrollTop = targetTop;
+    const reveal = () => {
+      selectedButton.scrollIntoView({
+        block: "start",
+        inline: "nearest"
+      });
       this.hasRevealedInitialSelection = true;
+    };
+    window.requestAnimationFrame(() => {
+      reveal();
+      window.setTimeout(reveal, 0);
     });
   }
   scrollSectionIntoView(containerEl, sectionEl) {
