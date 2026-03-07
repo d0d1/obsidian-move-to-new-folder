@@ -1,4 +1,4 @@
-import { App, Modal, Notice, TFolder } from "obsidian";
+import { App, Modal, Notice, Platform, TFolder } from "obsidian";
 
 import { validateFolderNameForCurrentPlatform, type FolderNameValidationResult } from "../validation/folderNameValidation";
 
@@ -252,8 +252,10 @@ export class MoveToNewFolderModal extends Modal {
     moveButton.addEventListener("click", submit);
 
     render();
-    nameInput.focus();
-    nameInput.select();
+    if (!Platform.isMobile) {
+      nameInput.focus();
+      nameInput.select();
+    }
   }
 
   onClose(): void {

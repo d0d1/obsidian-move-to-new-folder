@@ -369,8 +369,10 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
     };
     moveButton.addEventListener("click", submit);
     render();
-    nameInput.focus();
-    nameInput.select();
+    if (!import_obsidian3.Platform.isMobile) {
+      nameInput.focus();
+      nameInput.select();
+    }
   }
   onClose() {
     if (!this.didResolve) {
