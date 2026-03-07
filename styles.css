@@ -86,8 +86,8 @@
 .move-to-new-folder-modal .move-to-new-folder-validation.is-invalid {
   display: block;
   color: var(--text-error);
-  margin-top: 0.12rem;
-  margin-bottom: 0.42rem;
+  margin-top: 0.18rem;
+  margin-bottom: 0.18rem;
 }
 
 .move-to-new-folder-modal .move-to-new-folder-list {

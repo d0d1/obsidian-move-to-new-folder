@@ -172,7 +172,7 @@ function validateFolderNameForCurrentPlatform(folderName) {
 }
 
 // src/modals/moveToNewFolderModal.ts
-var TEMP_BUILD_MARKER = 10;
+var TEMP_BUILD_MARKER = 11;
 var MoveToNewFolderModal = class extends import_obsidian3.Modal {
   constructor(app, initialPath, targetKind, onCloseResolve) {
     super(app);

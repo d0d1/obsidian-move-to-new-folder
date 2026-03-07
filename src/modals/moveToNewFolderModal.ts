@@ -2,7 +2,7 @@ import { App, Modal, Notice, Platform, TFolder } from "obsidian";
 
 import { validateFolderNameForCurrentPlatform, type FolderNameValidationResult } from "../validation/folderNameValidation";
 
-const TEMP_BUILD_MARKER = 10;
+const TEMP_BUILD_MARKER = 11;
 
 export interface MoveToNewFolderModalResult {
   parentPath: string;
