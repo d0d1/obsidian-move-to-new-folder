@@ -58,6 +58,10 @@
   margin-bottom: -7px;
 }
 
+.move-to-new-folder-modal.move-to-new-folder-modal-mobile .move-to-new-folder-section-parent > .move-to-new-folder-label {
+  margin-bottom: -6px;
+}
+
 .move-to-new-folder-modal .move-to-new-folder-parent-path {
   display: flex;
   align-items: center;
