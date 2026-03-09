@@ -108,13 +108,14 @@
   overflow-x: auto;
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--radius-m);
-  padding: 0.25rem;
+  padding: 0.25rem 0.25rem 0.25rem 0.25rem;
+  margin-left: -5px;
+  margin-right: -5px;
   background: var(--background-primary-alt);
 }
 
 .move-to-new-folder-modal.move-to-new-folder-modal-mobile .move-to-new-folder-list {
   max-height: min(32vh, 220px);
-  padding-left: 0.45rem;
 }
 
 .move-to-new-folder-modal .move-to-new-folder-item {
@@ -131,6 +132,8 @@
   color: var(--text-normal);
   border-radius: calc(var(--radius-m) - 2px);
   padding: 0.5rem 0.65rem;
+  margin-left: 3px;
+  margin-right: 0;
   cursor: pointer;
   min-height: 2.5rem;
 }
