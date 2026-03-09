@@ -10,6 +10,10 @@
 - Creates the new child folder and moves the target safely with Obsidian APIs
 - Preserves Obsidian's normal link-update behavior when moving files
 
+## Preview
+
+<img src="docs/images/move-modal.png" alt="Move to New Folder modal" width="720">
+
 ## How to use it
 
 ### File explorer
