@@ -68,3 +68,8 @@ If you prefer not to use BRAT, you can install the plugin from the latest GitHub
 - No account requirement
 - No payments or subscriptions
 - No external service dependencies at runtime
+
+## Docs
+
+- [Use cases](docs/use-cases.md)
+- [FAQ](docs/faq.md)
