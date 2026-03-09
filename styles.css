@@ -172,10 +172,9 @@
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
-}
-
-.move-to-new-folder-modal.move-to-new-folder-modal-mobile .move-to-new-folder-actions {
-  padding-bottom: 0.25rem;
+  padding-top: 6px;
+  padding-bottom: 0;
+  align-items: center;
 }
 
 .move-to-new-folder-confirmation-modal {
