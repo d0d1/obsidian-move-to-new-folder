@@ -56,6 +56,7 @@
 .move-to-new-folder-modal .move-to-new-folder-parent-path {
   display: flex;
   align-items: center;
+  justify-content: center;
   padding: 0.75rem 0.8rem;
   border: 1px dashed var(--background-modifier-border);
   border-radius: var(--radius-m);
@@ -63,13 +64,19 @@
   color: var(--text-muted);
   overflow-x: auto;
   white-space: nowrap;
+  text-align: center;
+  min-height: 2.8rem;
+  box-sizing: border-box;
 }
 
 .move-to-new-folder-modal .move-to-new-folder-parent-badge {
-  display: inline-block;
+  display: flex;
+  align-items: center;
   min-width: 0;
   font-family: var(--font-monospace);
   font-size: var(--font-ui-small);
+  margin: 0 auto;
+  text-align: center;
 }
 
 .move-to-new-folder-modal .move-to-new-folder-text-input {
@@ -106,11 +113,13 @@
 }
 
 .move-to-new-folder-modal .move-to-new-folder-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: max-content;
   min-width: 100%;
   box-sizing: border-box;
-  text-align: left;
+  text-align: center;
   white-space: nowrap;
   border: 0;
   background: transparent;
@@ -118,17 +127,21 @@
   border-radius: calc(var(--radius-m) - 2px);
   padding: 0.5rem 0.65rem;
   cursor: pointer;
+  min-height: 2.5rem;
 }
 
 .move-to-new-folder-modal .move-to-new-folder-item-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 0.75rem;
+  min-height: 100%;
 }
 
 .move-to-new-folder-modal .move-to-new-folder-item-label {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  text-align: center;
 }
 
 .move-to-new-folder-modal .move-to-new-folder-item:hover {
