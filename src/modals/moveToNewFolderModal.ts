@@ -78,7 +78,7 @@ export class MoveToNewFolderModal extends Modal {
       cls: "move-to-new-folder-section move-to-new-folder-section-parent",
     });
     parentSectionEl.createEl("label", {
-      text: "Parent folder",
+      text: "Selected parent folder",
       cls: "move-to-new-folder-label",
     });
 
