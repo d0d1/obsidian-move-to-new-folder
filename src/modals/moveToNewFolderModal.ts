@@ -410,11 +410,9 @@ export class MoveToNewFolderModal extends Modal {
   }
 
   private isElementFullyVisible(containerEl: HTMLElement, itemEl: HTMLElement): boolean {
-    const itemTop = itemEl.offsetTop;
-    const itemBottom = itemTop + itemEl.offsetHeight;
-    const visibleTop = containerEl.scrollTop;
-    const visibleBottom = visibleTop + containerEl.clientHeight;
-    return itemTop >= visibleTop && itemBottom <= visibleBottom;
+    const containerRect = containerEl.getBoundingClientRect();
+    const itemRect = itemEl.getBoundingClientRect();
+    return itemRect.top >= containerRect.top && itemRect.bottom <= containerRect.bottom;
   }
 
   private moveListSelection(

@@ -508,11 +508,9 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
     }
   }
   isElementFullyVisible(containerEl, itemEl) {
-    const itemTop = itemEl.offsetTop;
-    const itemBottom = itemTop + itemEl.offsetHeight;
-    const visibleTop = containerEl.scrollTop;
-    const visibleBottom = visibleTop + containerEl.clientHeight;
-    return itemTop >= visibleTop && itemBottom <= visibleBottom;
+    const containerRect = containerEl.getBoundingClientRect();
+    const itemRect = itemEl.getBoundingClientRect();
+    return itemRect.top >= containerRect.top && itemRect.bottom <= containerRect.bottom;
   }
   moveListSelection(listEl, filtered, delta) {
     if (filtered.length === 0) {
