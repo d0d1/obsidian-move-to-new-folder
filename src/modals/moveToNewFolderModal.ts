@@ -63,6 +63,11 @@ export class MoveToNewFolderModal extends Modal {
       cls: "move-to-new-folder-section move-to-new-folder-section-name",
     });
 
+    nameSectionEl.createEl("label", {
+      text: "New folder name",
+      cls: "move-to-new-folder-label",
+    });
+
     const nameInput = nameSectionEl.createEl("input", {
       type: "text",
       placeholder: "New folder name",
@@ -78,7 +83,7 @@ export class MoveToNewFolderModal extends Modal {
       cls: "move-to-new-folder-section move-to-new-folder-section-parent",
     });
     parentSectionEl.createEl("label", {
-      text: "Parent folder",
+      text: "Destination parent folder",
       cls: "move-to-new-folder-label",
     });
 

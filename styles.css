@@ -36,11 +36,13 @@
 }
 
 .move-to-new-folder-modal .move-to-new-folder-section-name {
-  gap: 0.44rem;
+  gap: calc(0.44rem - 2px);
 }
 
 .move-to-new-folder-modal .move-to-new-folder-section-parent {
   order: 2;
+  gap: 6px;
+  margin-top: 12px;
 }
 
 .move-to-new-folder-modal .move-to-new-folder-section-name {
@@ -51,15 +53,7 @@
   color: var(--text-muted);
   font-size: var(--font-ui-small);
   font-weight: var(--font-medium);
-  padding-left: 5px;
-}
-
-.move-to-new-folder-modal .move-to-new-folder-section-parent > .move-to-new-folder-label {
-  margin-bottom: -7px;
-}
-
-.move-to-new-folder-modal.move-to-new-folder-modal-mobile .move-to-new-folder-section-parent > .move-to-new-folder-label {
-  margin-bottom: -6px;
+  padding-left: 0;
 }
 
 .move-to-new-folder-modal .move-to-new-folder-text-input {

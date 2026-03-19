@@ -214,6 +214,10 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
     const nameSectionEl = layoutEl.createDiv({
       cls: "move-to-new-folder-section move-to-new-folder-section-name"
     });
+    nameSectionEl.createEl("label", {
+      text: "New folder name",
+      cls: "move-to-new-folder-label"
+    });
     const nameInput = nameSectionEl.createEl("input", {
       type: "text",
       placeholder: "New folder name",
@@ -228,7 +232,7 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
       cls: "move-to-new-folder-section move-to-new-folder-section-parent"
     });
     parentSectionEl.createEl("label", {
-      text: "Parent folder",
+      text: "Destination parent folder",
       cls: "move-to-new-folder-label"
     });
     const searchInput = parentSectionEl.createEl("input", {
