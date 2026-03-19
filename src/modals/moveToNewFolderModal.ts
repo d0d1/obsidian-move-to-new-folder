@@ -151,6 +151,23 @@ export class MoveToNewFolderModal extends Modal {
           this.refreshSelection(listEl, filtered, "preserve");
         });
 
+        button.addEventListener("keydown", (event) => {
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+            this.moveListSelection(listEl, filtered, 1, true);
+          }
+
+          if (event.key === "ArrowUp") {
+            event.preventDefault();
+            this.moveListSelection(listEl, filtered, -1, true);
+          }
+
+          if (event.key === "Enter") {
+            event.preventDefault();
+            submit();
+          }
+        });
+
         button.addEventListener("mouseenter", () => {
           button.addClass("is-hovered");
         });
@@ -187,18 +204,14 @@ export class MoveToNewFolderModal extends Modal {
       if (event.key === "ArrowDown") {
         event.preventDefault();
         if (filtered.length > 0) {
-          this.selectedIndex = Math.min(this.selectedIndex + 1, filtered.length - 1);
-          this.selectedPath = filtered[this.selectedIndex];
-          this.refreshSelection(listEl, filtered, "preserve");
+          this.moveListSelection(listEl, filtered, 1, false);
         }
       }
 
       if (event.key === "ArrowUp") {
         event.preventDefault();
         if (filtered.length > 0) {
-          this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
-          this.selectedPath = filtered[this.selectedIndex];
-          this.refreshSelection(listEl, filtered, "preserve");
+          this.moveListSelection(listEl, filtered, -1, false);
         }
       }
 
@@ -215,12 +228,31 @@ export class MoveToNewFolderModal extends Modal {
     });
     cancelButton.type = "button";
     cancelButton.addEventListener("click", () => this.closeWithResult(null));
+    cancelButton.addEventListener("keydown", (event) => {
+      if (event.key === "Tab" && !event.shiftKey) {
+        event.preventDefault();
+        if (!moveButton.disabled) {
+          moveButton.focus();
+          return;
+        }
+
+        nameInput.focus();
+        nameInput.select();
+      }
+    });
 
     const moveButton = actionsEl.createEl("button", {
       text: this.targetKind === "folder" ? "Move folder" : "Move file",
       cls: "mod-cta",
     });
     moveButton.type = "button";
+    moveButton.addEventListener("keydown", (event) => {
+      if (event.key === "Tab" && !event.shiftKey) {
+        event.preventDefault();
+        nameInput.focus();
+        nameInput.select();
+      }
+    });
 
     const updateValidationState = (): FolderNameValidationResult => {
       const validation = validateFolderNameForCurrentPlatform(nameInput.value);
@@ -228,7 +260,6 @@ export class MoveToNewFolderModal extends Modal {
       const shouldShowError = !validation.isValid && (this.hasEditedFolderName || this.hasTriedSubmit);
       validationEl.toggleClass("is-invalid", shouldShowError);
       validationEl.setText(shouldShowError && validation.message ? validation.message : "");
-      moveButton.disabled = !validation.isValid;
       return validation;
     };
 
@@ -312,6 +343,7 @@ export class MoveToNewFolderModal extends Modal {
     for (const [path, button] of this.listByPath.entries()) {
       const shouldSelect = path === this.selectedPath;
       button.toggleClass("is-selected", shouldSelect);
+      button.tabIndex = shouldSelect ? 0 : -1;
       if (shouldSelect) {
         if (scrollBehavior === "preserve" && !this.isElementFullyVisible(listEl, button)) {
           button.scrollIntoView({ block: "nearest" });
@@ -332,6 +364,25 @@ export class MoveToNewFolderModal extends Modal {
     const visibleTop = containerEl.scrollTop;
     const visibleBottom = visibleTop + containerEl.clientHeight;
     return itemTop >= visibleTop && itemBottom <= visibleBottom;
+  }
+
+  private moveListSelection(
+    listEl: HTMLElement,
+    filtered: string[],
+    delta: number,
+    focusSelection: boolean,
+  ): void {
+    if (filtered.length === 0) {
+      return;
+    }
+
+    this.selectedIndex = Math.max(0, Math.min(this.selectedIndex + delta, filtered.length - 1));
+    this.selectedPath = filtered[this.selectedIndex];
+    this.refreshSelection(listEl, filtered, "preserve");
+
+    if (focusSelection) {
+      this.listByPath.get(this.selectedPath)?.focus();
+    }
   }
 
   private revealInitialSelection(listEl: HTMLElement): void {

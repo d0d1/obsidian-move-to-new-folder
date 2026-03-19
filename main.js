@@ -289,6 +289,20 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
           this.selectedPath = folderPath;
           this.refreshSelection(listEl, filtered, "preserve");
         });
+        button.addEventListener("keydown", (event) => {
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+            this.moveListSelection(listEl, filtered, 1, true);
+          }
+          if (event.key === "ArrowUp") {
+            event.preventDefault();
+            this.moveListSelection(listEl, filtered, -1, true);
+          }
+          if (event.key === "Enter") {
+            event.preventDefault();
+            submit();
+          }
+        });
         button.addEventListener("mouseenter", () => {
           button.addClass("is-hovered");
         });
@@ -318,17 +332,13 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
       if (event.key === "ArrowDown") {
         event.preventDefault();
         if (filtered.length > 0) {
-          this.selectedIndex = Math.min(this.selectedIndex + 1, filtered.length - 1);
-          this.selectedPath = filtered[this.selectedIndex];
-          this.refreshSelection(listEl, filtered, "preserve");
+          this.moveListSelection(listEl, filtered, 1, false);
         }
       }
       if (event.key === "ArrowUp") {
         event.preventDefault();
         if (filtered.length > 0) {
-          this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
-          this.selectedPath = filtered[this.selectedIndex];
-          this.refreshSelection(listEl, filtered, "preserve");
+          this.moveListSelection(listEl, filtered, -1, false);
         }
       }
       if (event.key === "Enter") {
@@ -343,17 +353,34 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
     });
     cancelButton.type = "button";
     cancelButton.addEventListener("click", () => this.closeWithResult(null));
+    cancelButton.addEventListener("keydown", (event) => {
+      if (event.key === "Tab" && !event.shiftKey) {
+        event.preventDefault();
+        if (!moveButton.disabled) {
+          moveButton.focus();
+          return;
+        }
+        nameInput.focus();
+        nameInput.select();
+      }
+    });
     const moveButton = actionsEl.createEl("button", {
       text: this.targetKind === "folder" ? "Move folder" : "Move file",
       cls: "mod-cta"
     });
     moveButton.type = "button";
+    moveButton.addEventListener("keydown", (event) => {
+      if (event.key === "Tab" && !event.shiftKey) {
+        event.preventDefault();
+        nameInput.focus();
+        nameInput.select();
+      }
+    });
     const updateValidationState = () => {
       const validation = validateFolderNameForCurrentPlatform(nameInput.value);
       const shouldShowError = !validation.isValid && (this.hasEditedFolderName || this.hasTriedSubmit);
       validationEl.toggleClass("is-invalid", shouldShowError);
       validationEl.setText(shouldShowError && validation.message ? validation.message : "");
-      moveButton.disabled = !validation.isValid;
       return validation;
     };
     nameInput.addEventListener("input", () => {
@@ -421,6 +448,7 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
     for (const [path, button] of this.listByPath.entries()) {
       const shouldSelect = path === this.selectedPath;
       button.toggleClass("is-selected", shouldSelect);
+      button.tabIndex = shouldSelect ? 0 : -1;
       if (shouldSelect) {
         if (scrollBehavior === "preserve" && !this.isElementFullyVisible(listEl, button)) {
           button.scrollIntoView({ block: "nearest" });
@@ -439,6 +467,18 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
     const visibleTop = containerEl.scrollTop;
     const visibleBottom = visibleTop + containerEl.clientHeight;
     return itemTop >= visibleTop && itemBottom <= visibleBottom;
+  }
+  moveListSelection(listEl, filtered, delta, focusSelection) {
+    var _a;
+    if (filtered.length === 0) {
+      return;
+    }
+    this.selectedIndex = Math.max(0, Math.min(this.selectedIndex + delta, filtered.length - 1));
+    this.selectedPath = filtered[this.selectedIndex];
+    this.refreshSelection(listEl, filtered, "preserve");
+    if (focusSelection) {
+      (_a = this.listByPath.get(this.selectedPath)) == null ? void 0 : _a.focus();
+    }
   }
   revealInitialSelection(listEl) {
     const selectedButton = this.listByPath.get(this.selectedPath);

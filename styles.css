@@ -152,6 +152,17 @@
   align-items: center;
 }
 
+.move-to-new-folder-modal .move-to-new-folder-actions .mod-cta {
+  background: color-mix(in srgb, var(--interactive-accent) 62%, black);
+  border-color: color-mix(in srgb, var(--interactive-accent) 55%, white 8%);
+  color: var(--text-on-accent, #fff);
+}
+
+.move-to-new-folder-modal .move-to-new-folder-actions .mod-cta:hover:not(:disabled),
+.move-to-new-folder-modal .move-to-new-folder-actions .mod-cta:focus-visible:not(:disabled) {
+  background: color-mix(in srgb, var(--interactive-accent) 56%, black);
+}
+
 .move-to-new-folder-confirmation-modal {
   width: min(480px, 90vw);
 }
