@@ -62,32 +62,6 @@
   margin-bottom: -6px;
 }
 
-.move-to-new-folder-modal .move-to-new-folder-parent-path {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 8px 13px;
-  border: 1px dashed var(--background-modifier-border);
-  border-radius: var(--radius-m);
-  background: color-mix(in srgb, var(--background-secondary) 72%, transparent);
-  color: var(--text-muted);
-  overflow-x: auto;
-  white-space: nowrap;
-  text-align: left;
-  min-height: 0;
-  box-sizing: border-box;
-}
-
-.move-to-new-folder-modal .move-to-new-folder-parent-badge {
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  font-family: var(--font-monospace);
-  font-size: var(--font-ui-small);
-  margin: 0 0 0 -7px;
-  text-align: left;
-}
-
 .move-to-new-folder-modal .move-to-new-folder-text-input {
   width: 100%;
 }

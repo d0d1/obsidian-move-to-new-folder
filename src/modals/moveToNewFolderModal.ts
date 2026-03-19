@@ -78,12 +78,8 @@ export class MoveToNewFolderModal extends Modal {
       cls: "move-to-new-folder-section move-to-new-folder-section-parent",
     });
     parentSectionEl.createEl("label", {
-      text: "Selected parent folder",
+      text: "Parent folder",
       cls: "move-to-new-folder-label",
-    });
-
-    const selectedParentEl = parentSectionEl.createDiv({
-      cls: "move-to-new-folder-parent-path",
     });
 
     const searchInput = parentSectionEl.createEl("input", {
@@ -96,21 +92,12 @@ export class MoveToNewFolderModal extends Modal {
     }
     const listEl = parentSectionEl.createDiv({ cls: "move-to-new-folder-list" });
 
-    const updateSelectedParent = (): void => {
-      selectedParentEl.empty();
-      selectedParentEl.createSpan({
-        cls: "move-to-new-folder-parent-badge",
-        text: this.selectedPath.length > 0 ? this.selectedPath : "/",
-      });
-    };
-
     const render = (scrollBehavior: "initial" | "preserve" = "preserve"): void => {
       listEl.empty();
       this.listByPath.clear();
 
       const filtered = this.getFilteredFolders();
       if (filtered.length === 0) {
-        updateSelectedParent();
         listEl.createDiv({
           text: "No folders match your search.",
           cls: "move-to-new-folder-empty",
@@ -125,11 +112,9 @@ export class MoveToNewFolderModal extends Modal {
       const selectedPathIndex = filtered.indexOf(this.selectedPath);
       if (selectedPathIndex >= 0) {
         this.selectedIndex = selectedPathIndex;
-      } else {
+        } else {
         this.selectedPath = filtered[this.selectedIndex];
       }
-
-      updateSelectedParent();
 
       for (const folderPath of filtered) {
         const button = listEl.createEl("button", {
@@ -158,7 +143,6 @@ export class MoveToNewFolderModal extends Modal {
             this.selectedIndex = selectedPathIndex;
           }
           this.selectedPath = folderPath;
-          updateSelectedParent();
           this.refreshSelection(listEl, filtered, "preserve");
         });
 

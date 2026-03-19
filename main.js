@@ -228,11 +228,8 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
       cls: "move-to-new-folder-section move-to-new-folder-section-parent"
     });
     parentSectionEl.createEl("label", {
-      text: "Selected parent folder",
+      text: "Parent folder",
       cls: "move-to-new-folder-label"
-    });
-    const selectedParentEl = parentSectionEl.createDiv({
-      cls: "move-to-new-folder-parent-path"
     });
     const searchInput = parentSectionEl.createEl("input", {
       type: "text",
@@ -243,19 +240,11 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
       searchInput.tabIndex = -1;
     }
     const listEl = parentSectionEl.createDiv({ cls: "move-to-new-folder-list" });
-    const updateSelectedParent = () => {
-      selectedParentEl.empty();
-      selectedParentEl.createSpan({
-        cls: "move-to-new-folder-parent-badge",
-        text: this.selectedPath.length > 0 ? this.selectedPath : "/"
-      });
-    };
     const render = (scrollBehavior = "preserve") => {
       listEl.empty();
       this.listByPath.clear();
       const filtered = this.getFilteredFolders();
       if (filtered.length === 0) {
-        updateSelectedParent();
         listEl.createDiv({
           text: "No folders match your search.",
           cls: "move-to-new-folder-empty"
@@ -271,7 +260,6 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
       } else {
         this.selectedPath = filtered[this.selectedIndex];
       }
-      updateSelectedParent();
       for (const folderPath of filtered) {
         const button = listEl.createEl("button", {
           cls: "move-to-new-folder-item"
@@ -295,7 +283,6 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
             this.selectedIndex = selectedPathIndex2;
           }
           this.selectedPath = folderPath;
-          updateSelectedParent();
           this.refreshSelection(listEl, filtered, "preserve");
         });
         button.addEventListener("mouseenter", () => {
