@@ -314,6 +314,12 @@ export class MoveToNewFolderModal extends Modal {
     });
 
     nameInput.addEventListener("keydown", (event) => {
+      if (event.key === "Tab" && event.shiftKey) {
+        event.preventDefault();
+        moveButton.focus();
+        return;
+      }
+
       if (event.key === "Enter") {
         event.preventDefault();
         submit();
