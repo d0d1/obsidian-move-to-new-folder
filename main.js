@@ -211,44 +211,69 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
       this.targetKind === "folder" ? "Move folder to new folder" : "Move file to new folder"
     );
     const layoutEl = contentEl.createDiv({ cls: "move-to-new-folder-layout" });
+    const idPrefix = `move-to-new-folder-${Date.now()}`;
+    const nameInputId = `${idPrefix}-name-input`;
+    const validationId = `${idPrefix}-name-validation`;
+    const parentLabelId = `${idPrefix}-parent-label`;
+    const searchLabelId = `${idPrefix}-filter-label`;
+    const searchInputId = `${idPrefix}-filter-input`;
+    const listboxId = `${idPrefix}-listbox`;
     const nameSectionEl = layoutEl.createDiv({
       cls: "move-to-new-folder-section move-to-new-folder-section-name"
     });
-    nameSectionEl.createEl("label", {
+    const nameLabelEl = nameSectionEl.createEl("label", {
       text: "New folder name",
       cls: "move-to-new-folder-label"
     });
+    nameLabelEl.htmlFor = nameInputId;
     const nameInput = nameSectionEl.createEl("input", {
       type: "text",
       placeholder: "New folder name",
       cls: "move-to-new-folder-text-input"
     });
+    nameInput.id = nameInputId;
     nameInput.value = this.folderName;
     nameInput.enterKeyHint = "done";
+    nameInput.setAttr("aria-describedby", validationId);
     const validationEl = nameSectionEl.createDiv({
       cls: "move-to-new-folder-validation"
     });
+    validationEl.id = validationId;
+    validationEl.setAttr("role", "alert");
     const parentSectionEl = layoutEl.createDiv({
       cls: "move-to-new-folder-section move-to-new-folder-section-parent"
     });
-    parentSectionEl.createEl("label", {
+    const parentLabelEl = parentSectionEl.createEl("label", {
       text: "Destination parent folder",
       cls: "move-to-new-folder-label"
     });
+    parentLabelEl.id = parentLabelId;
+    const searchLabelEl = parentSectionEl.createEl("label", {
+      text: "Filter folders",
+      cls: "move-to-new-folder-sr-only"
+    });
+    searchLabelEl.id = searchLabelId;
+    searchLabelEl.htmlFor = searchInputId;
     const searchInput = parentSectionEl.createEl("input", {
       type: "text",
       placeholder: "Filter folders...",
       cls: "move-to-new-folder-search"
     });
+    searchInput.id = searchInputId;
     if (import_obsidian3.Platform.isMobile) {
       searchInput.tabIndex = -1;
     }
     const listEl = parentSectionEl.createDiv({ cls: "move-to-new-folder-list" });
+    listEl.id = listboxId;
+    listEl.tabIndex = 0;
+    listEl.setAttr("role", "listbox");
+    listEl.setAttr("aria-labelledby", parentLabelId);
     const render = (scrollBehavior = "preserve") => {
       listEl.empty();
       this.listByPath.clear();
       const filtered = this.getFilteredFolders();
       if (filtered.length === 0) {
+        listEl.removeAttribute("aria-activedescendant");
         listEl.createDiv({
           text: "No folders match your search.",
           cls: "move-to-new-folder-empty"
@@ -264,53 +289,42 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
       } else {
         this.selectedPath = filtered[this.selectedIndex];
       }
-      for (const folderPath of filtered) {
-        const button = listEl.createEl("button", {
+      filtered.forEach((folderPath, index) => {
+        const optionEl = listEl.createDiv({
           cls: "move-to-new-folder-item"
         });
-        button.type = "button";
-        button.dataset.path = folderPath;
-        const rowEl = button.createDiv({ cls: "move-to-new-folder-item-row" });
+        optionEl.dataset.path = folderPath;
+        optionEl.id = `${idPrefix}-option-${index}`;
+        optionEl.setAttr("role", "option");
+        optionEl.setAttr("aria-selected", "false");
+        const rowEl = optionEl.createDiv({ cls: "move-to-new-folder-item-row" });
         rowEl.createSpan({
           cls: "move-to-new-folder-item-label",
           text: folderPath.length > 0 ? folderPath : "/"
         });
         if (folderPath === this.selectedPath) {
-          button.addClass("is-selected");
+          optionEl.addClass("is-selected");
         }
-        button.addEventListener("mousedown", (event) => {
+        optionEl.addEventListener("mousedown", (event) => {
           event.preventDefault();
         });
-        button.addEventListener("click", () => {
+        optionEl.addEventListener("click", () => {
           const selectedPathIndex2 = filtered.indexOf(folderPath);
           if (selectedPathIndex2 >= 0) {
             this.selectedIndex = selectedPathIndex2;
           }
           this.selectedPath = folderPath;
           this.refreshSelection(listEl, filtered, "preserve");
+          listEl.focus();
         });
-        button.addEventListener("keydown", (event) => {
-          if (event.key === "ArrowDown") {
-            event.preventDefault();
-            this.moveListSelection(listEl, filtered, 1, true);
-          }
-          if (event.key === "ArrowUp") {
-            event.preventDefault();
-            this.moveListSelection(listEl, filtered, -1, true);
-          }
-          if (event.key === "Enter") {
-            event.preventDefault();
-            submit();
-          }
+        optionEl.addEventListener("mouseenter", () => {
+          optionEl.addClass("is-hovered");
         });
-        button.addEventListener("mouseenter", () => {
-          button.addClass("is-hovered");
+        optionEl.addEventListener("mouseleave", () => {
+          optionEl.removeClass("is-hovered");
         });
-        button.addEventListener("mouseleave", () => {
-          button.removeClass("is-hovered");
-        });
-        this.listByPath.set(folderPath, button);
-      }
+        this.listByPath.set(folderPath, optionEl);
+      });
       this.refreshSelection(listEl, filtered, scrollBehavior);
       if (scrollBehavior === "initial" && !this.hasRevealedInitialSelection) {
         this.revealInitialSelection(listEl);
@@ -332,16 +346,41 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
       if (event.key === "ArrowDown") {
         event.preventDefault();
         if (filtered.length > 0) {
-          this.moveListSelection(listEl, filtered, 1, false);
+          this.moveListSelection(listEl, filtered, 1);
+          listEl.focus();
         }
       }
       if (event.key === "ArrowUp") {
         event.preventDefault();
         if (filtered.length > 0) {
-          this.moveListSelection(listEl, filtered, -1, false);
+          this.moveListSelection(listEl, filtered, -1);
+          listEl.focus();
         }
       }
       if (event.key === "Enter") {
+        event.preventDefault();
+        submit();
+      }
+    });
+    listEl.addEventListener("keydown", (event) => {
+      const filtered = this.getFilteredFolders();
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        this.moveListSelection(listEl, filtered, 1);
+      }
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+        this.moveListSelection(listEl, filtered, -1);
+      }
+      if (event.key === "Home") {
+        event.preventDefault();
+        this.moveListSelectionToIndex(listEl, filtered, 0);
+      }
+      if (event.key === "End") {
+        event.preventDefault();
+        this.moveListSelectionToIndex(listEl, filtered, filtered.length - 1);
+      }
+      if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
         submit();
       }
@@ -381,6 +420,7 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
       const shouldShowError = !validation.isValid && (this.hasEditedFolderName || this.hasTriedSubmit);
       validationEl.toggleClass("is-invalid", shouldShowError);
       validationEl.setText(shouldShowError && validation.message ? validation.message : "");
+      nameInput.setAttr("aria-invalid", shouldShowError ? "true" : "false");
       return validation;
     };
     nameInput.addEventListener("input", () => {
@@ -448,11 +488,12 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
     for (const [path, button] of this.listByPath.entries()) {
       const shouldSelect = path === this.selectedPath;
       button.toggleClass("is-selected", shouldSelect);
-      button.tabIndex = shouldSelect ? 0 : -1;
+      button.setAttr("aria-selected", shouldSelect ? "true" : "false");
       if (shouldSelect) {
         if (scrollBehavior === "preserve" && !this.isElementFullyVisible(listEl, button)) {
           button.scrollIntoView({ block: "nearest" });
         }
+        listEl.setAttr("aria-activedescendant", button.id);
       }
     }
     if (!filtered.includes(this.selectedPath) && filtered.length > 0) {
@@ -468,17 +509,21 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
     const visibleBottom = visibleTop + containerEl.clientHeight;
     return itemTop >= visibleTop && itemBottom <= visibleBottom;
   }
-  moveListSelection(listEl, filtered, delta, focusSelection) {
-    var _a;
+  moveListSelection(listEl, filtered, delta) {
     if (filtered.length === 0) {
       return;
     }
     this.selectedIndex = Math.max(0, Math.min(this.selectedIndex + delta, filtered.length - 1));
     this.selectedPath = filtered[this.selectedIndex];
     this.refreshSelection(listEl, filtered, "preserve");
-    if (focusSelection) {
-      (_a = this.listByPath.get(this.selectedPath)) == null ? void 0 : _a.focus();
+  }
+  moveListSelectionToIndex(listEl, filtered, index) {
+    if (filtered.length === 0) {
+      return;
     }
+    this.selectedIndex = Math.max(0, Math.min(index, filtered.length - 1));
+    this.selectedPath = filtered[this.selectedIndex];
+    this.refreshSelection(listEl, filtered, "preserve");
   }
   revealInitialSelection(listEl) {
     const selectedButton = this.listByPath.get(this.selectedPath);
