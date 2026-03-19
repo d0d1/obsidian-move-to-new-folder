@@ -561,7 +561,7 @@ var MoveToNewFolderPlugin = class extends import_obsidian5.Plugin {
   }
   async runFileMoveFlow(file, leaf) {
     var _a, _b;
-    let initialPath = this.settings.defaultToCurrentParent ? (_b = (_a = file.parent) == null ? void 0 : _a.path) != null ? _b : "" : "";
+    let initialPath = this.settings.defaultToCurrentParent ? this.normalizeFolderPickerPath((_b = (_a = file.parent) == null ? void 0 : _a.path) != null ? _b : "") : "";
     while (true) {
       const moveTarget = await this.promptForMoveTarget(initialPath, "file");
       if (moveTarget === null) {
@@ -603,7 +603,7 @@ var MoveToNewFolderPlugin = class extends import_obsidian5.Plugin {
   }
   async runFolderMoveFlow(folder) {
     var _a, _b;
-    let initialPath = (_b = (_a = folder.parent) == null ? void 0 : _a.path) != null ? _b : "";
+    let initialPath = this.normalizeFolderPickerPath((_b = (_a = folder.parent) == null ? void 0 : _a.path) != null ? _b : "");
     while (true) {
       const moveTarget = await this.promptForMoveTarget(initialPath, "folder");
       if (moveTarget === null) {
@@ -704,7 +704,7 @@ var MoveToNewFolderPlugin = class extends import_obsidian5.Plugin {
     const folderSet = /* @__PURE__ */ new Set([""]);
     for (const item of this.app.vault.getAllLoadedFiles()) {
       if (item instanceof import_obsidian5.TFolder) {
-        folderSet.add(item.path);
+        folderSet.add(this.normalizeFolderPickerPath(item.path));
       }
     }
     this.folderPathsCache = Array.from(folderSet).sort((a, b) => a.localeCompare(b));
@@ -712,6 +712,12 @@ var MoveToNewFolderPlugin = class extends import_obsidian5.Plugin {
   }
   invalidateFolderPathsCache() {
     this.folderPathsCache = null;
+  }
+  normalizeFolderPickerPath(path) {
+    if (path === "" || path === "/") {
+      return "";
+    }
+    return (0, import_obsidian5.normalizePath)(path);
   }
   async openMovedFile(file, leaf) {
     const targetLeaf = leaf != null ? leaf : this.app.workspace.getMostRecentLeaf();

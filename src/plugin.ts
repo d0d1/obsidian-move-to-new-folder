@@ -93,7 +93,9 @@ export default class MoveToNewFolderPlugin extends Plugin {
   }
 
   private async runFileMoveFlow(file: TFile, leaf?: WorkspaceLeaf): Promise<void> {
-    let initialPath = this.settings.defaultToCurrentParent ? file.parent?.path ?? "" : "";
+    let initialPath = this.settings.defaultToCurrentParent
+      ? this.normalizeFolderPickerPath(file.parent?.path ?? "")
+      : "";
 
     while (true) {
       const moveTarget = await this.promptForMoveTarget(initialPath, "file");
@@ -144,7 +146,7 @@ export default class MoveToNewFolderPlugin extends Plugin {
   }
 
   private async runFolderMoveFlow(folder: TFolder): Promise<void> {
-    let initialPath = folder.parent?.path ?? "";
+    let initialPath = this.normalizeFolderPickerPath(folder.parent?.path ?? "");
 
     while (true) {
       const moveTarget = await this.promptForMoveTarget(initialPath, "folder");
@@ -274,7 +276,7 @@ export default class MoveToNewFolderPlugin extends Plugin {
     const folderSet = new Set<string>([""]);
     for (const item of this.app.vault.getAllLoadedFiles()) {
       if (item instanceof TFolder) {
-        folderSet.add(item.path);
+        folderSet.add(this.normalizeFolderPickerPath(item.path));
       }
     }
 
@@ -284,6 +286,14 @@ export default class MoveToNewFolderPlugin extends Plugin {
 
   private invalidateFolderPathsCache(): void {
     this.folderPathsCache = null;
+  }
+
+  private normalizeFolderPickerPath(path: string): string {
+    if (path === "" || path === "/") {
+      return "";
+    }
+
+    return normalizePath(path);
   }
 
   private async openMovedFile(file: TFile, leaf?: WorkspaceLeaf): Promise<void> {
