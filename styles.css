@@ -1,5 +1,7 @@
 .move-to-new-folder-modal {
   width: min(640px, 92vw);
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 .move-to-new-folder-modal .modal-content {
