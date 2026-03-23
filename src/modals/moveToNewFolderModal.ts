@@ -304,6 +304,7 @@ export class MoveToNewFolderModal extends Modal {
       validationEl.toggleClass("is-invalid", shouldShowError);
       validationEl.setText(shouldShowError && validation.message ? validation.message : "");
       nameInput.setAttr("aria-invalid", shouldShowError ? "true" : "false");
+      moveButton.disabled = !validation.isValid;
       return validation;
     };
 
@@ -316,7 +317,12 @@ export class MoveToNewFolderModal extends Modal {
     nameInput.addEventListener("keydown", (event) => {
       if (event.key === "Tab" && event.shiftKey) {
         event.preventDefault();
-        moveButton.focus();
+        if (!moveButton.disabled) {
+          moveButton.focus();
+          return;
+        }
+
+        cancelButton.focus();
         return;
       }
 

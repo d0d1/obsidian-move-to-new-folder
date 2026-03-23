@@ -421,6 +421,7 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
       validationEl.toggleClass("is-invalid", shouldShowError);
       validationEl.setText(shouldShowError && validation.message ? validation.message : "");
       nameInput.setAttr("aria-invalid", shouldShowError ? "true" : "false");
+      moveButton.disabled = !validation.isValid;
       return validation;
     };
     nameInput.addEventListener("input", () => {
@@ -431,7 +432,11 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
     nameInput.addEventListener("keydown", (event) => {
       if (event.key === "Tab" && event.shiftKey) {
         event.preventDefault();
-        moveButton.focus();
+        if (!moveButton.disabled) {
+          moveButton.focus();
+          return;
+        }
+        cancelButton.focus();
         return;
       }
       if (event.key === "Enter") {
