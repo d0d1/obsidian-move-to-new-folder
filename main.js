@@ -417,7 +417,7 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
     });
     const updateValidationState = () => {
       const validation = validateFolderNameForCurrentPlatform(nameInput.value);
-      const shouldShowError = !validation.isValid && (this.hasEditedFolderName || this.hasTriedSubmit);
+      const shouldShowError = !validation.isValid && validation.message !== null && (this.hasEditedFolderName || this.hasTriedSubmit);
       validationEl.toggleClass("is-invalid", shouldShowError);
       validationEl.setText(shouldShowError && validation.message ? validation.message : "");
       nameInput.setAttr("aria-invalid", shouldShowError ? "true" : "false");
