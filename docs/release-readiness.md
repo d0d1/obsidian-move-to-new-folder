@@ -30,8 +30,8 @@ This document tracks submission readiness for the Obsidian community plugin revi
 
 ### 3. Platform testing
 
-- `PASS` Windows and Android have been primary manual test targets.
-- `UNKNOWN` macOS and Linux testing has not been confirmed in this document.
+- `PASS` Windows, Android, and Linux manual testing has been confirmed in this document.
+- `UNKNOWN` macOS testing has not been confirmed in this document.
 - `UNKNOWN` iOS testing has not been confirmed in this document.
 - `PASS` The code uses Obsidian platform checks and avoids desktop-only modules in runtime plugin code.
 
