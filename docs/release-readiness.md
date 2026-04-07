@@ -1,6 +1,6 @@
 # Release Readiness
 
-Status date: 2026-03-07
+Status date: 2026-04-07
 
 This document tracks submission readiness for the Obsidian community plugin review process.
 
@@ -8,18 +8,18 @@ This document tracks submission readiness for the Obsidian community plugin revi
 
 - Ready to submit: no
 - Buildable release asset state: yes
-- Runtime testing complete across claimed platforms: pending final maintainer confirmation
+- Runtime testing complete across claimed platforms: yes for Windows, Android, and Linux
 
 ## Checklist audit
 
 ### 1. Basic repo/release setup
 
-- `PASS` Root [README.md](/home/dbhul/code/obsidian-move-to-new-folder/README.md) exists and explains the plugin.
-- `PASS` Root [LICENSE](/home/dbhul/code/obsidian-move-to-new-folder/LICENSE) exists.
-- `PASS` Root [manifest.json](/home/dbhul/code/obsidian-move-to-new-folder/manifest.json) exists and is valid JSON.
+- `PASS` Root [README.md](../README.md) exists and explains the plugin.
+- `PASS` Root [LICENSE](../LICENSE) exists.
+- `PASS` Root [manifest.json](../manifest.json) exists and is valid JSON.
 - `PASS` GitHub release assets have been created and uploaded.
-- `PASS` Release tag/version alignment is prepared with tag `1.0.0`.
-- `PASS` Root [versions.json](/home/dbhul/code/obsidian-move-to-new-folder/versions.json) exists and maps plugin version to minimum Obsidian version.
+- `PASS` Release tag/version alignment is confirmed with tag `1.0.5`.
+- `PASS` Root [versions.json](../versions.json) exists and maps plugin version to minimum Obsidian version.
 
 ### 2. Naming and metadata
 
@@ -50,7 +50,7 @@ This document tracks submission readiness for the Obsidian community plugin revi
 
 ### 5. Performance
 
-- `PASS` [main.js](/home/dbhul/code/obsidian-move-to-new-folder/main.js) is built from the production build command.
+- `PASS` [main.js](../main.js) is built from the production build command.
 - `PASS` `onload()` is lightweight.
 - `PASS` menu registration work is deferred to `workspace.onLayoutReady()`.
 - `PASS` Event listeners are registered through Obsidian lifecycle management.
