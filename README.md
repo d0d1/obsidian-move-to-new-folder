@@ -39,8 +39,8 @@ Folder moves are supported from the file explorer context menu.
 ## Platform support
 
 - Designed for desktop and mobile
-- Tested primarily on Windows and Android
-- Other supported Obsidian platforms may work but are not fully validated yet
+- Tested on Windows, Android, and Linux
+- macOS and iOS have not been fully validated yet
 
 ## Install with BRAT
 

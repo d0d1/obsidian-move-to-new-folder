@@ -42,7 +42,7 @@ Yes. File moves use Obsidian’s file manager behavior so link updates continue 
 
 ## Does the plugin work on mobile?
 
-It is designed for desktop and mobile. Testing has focused primarily on Windows and Android.
+It is designed for desktop and mobile. It has been tested on Windows, Android, and Linux.
 
 ## Does the plugin use the network?
 
