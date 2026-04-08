@@ -44,7 +44,7 @@ Folder moves are supported from the file explorer context menu.
 
 ## Install with BRAT
 
-This plugin is currently in beta and can be installed through BRAT before official Community Plugins submission.
+This plugin is available via BRAT and GitHub releases before it is listed in Community Plugins.
 
 1. Install and enable the BRAT plugin in Obsidian
 2. In BRAT, choose to add a beta plugin from GitHub
