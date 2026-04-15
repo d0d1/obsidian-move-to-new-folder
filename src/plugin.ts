@@ -149,7 +149,7 @@ export default class MoveToNewFolderPlugin extends Plugin {
     let initialPath = this.normalizeFolderPickerPath(folder.parent?.path ?? "");
 
     while (true) {
-      const moveTarget = await this.promptForMoveTarget(initialPath, "folder");
+      const moveTarget = await this.promptForMoveTarget(initialPath, "folder", folder.path);
       if (moveTarget === null) {
         return;
       }
@@ -161,6 +161,11 @@ export default class MoveToNewFolderPlugin extends Plugin {
           : moveTarget.folderName,
       );
 
+      if (targetFolderPath === folder.path || targetFolderPath.startsWith(folder.path + "/")) {
+        new Notice("Cannot move a folder into itself or one of its subfolders.");
+        return;
+      }
+
       const targetContainer = await this.ensureTargetFolder(targetFolderPath, "folder");
       if (targetContainer === "back") {
         continue;
@@ -170,6 +175,12 @@ export default class MoveToNewFolderPlugin extends Plugin {
       }
 
       const targetChildPath = normalizePath(`${targetContainer.path}/${folder.name}`);
+
+      if (targetChildPath === folder.path || targetChildPath.startsWith(folder.path + "/")) {
+        new Notice("Cannot move a folder into itself or one of its subfolders.");
+        return;
+      }
+
       const existingDestination = this.app.vault.getAbstractFileByPath(targetChildPath);
       if (existingDestination && existingDestination.path !== folder.path) {
         new Notice(`Move canceled: folder already exists at "${targetChildPath}".`);
@@ -253,9 +264,16 @@ export default class MoveToNewFolderPlugin extends Plugin {
   private async promptForMoveTarget(
     initialPath: string,
     targetKind: MoveTargetKind,
+    excludeFolderPath?: string,
   ): Promise<MoveToNewFolderModalResult | null> {
+    let paths = this.getFolderPaths();
+    if (excludeFolderPath !== undefined && excludeFolderPath.length > 0) {
+      paths = paths.filter(
+        (p) => p !== excludeFolderPath && !p.startsWith(excludeFolderPath + "/"),
+      );
+    }
     return new Promise((resolve) => {
-      const modal = new MoveToNewFolderModal(this.app, this.getFolderPaths(), initialPath, targetKind, (result) => {
+      const modal = new MoveToNewFolderModal(this.app, paths, initialPath, targetKind, (result) => {
         resolve(result);
       });
       modal.open();

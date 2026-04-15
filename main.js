@@ -698,7 +698,7 @@ var MoveToNewFolderPlugin = class extends import_obsidian5.Plugin {
     var _a, _b;
     let initialPath = this.normalizeFolderPickerPath((_b = (_a = folder.parent) == null ? void 0 : _a.path) != null ? _b : "");
     while (true) {
-      const moveTarget = await this.promptForMoveTarget(initialPath, "folder");
+      const moveTarget = await this.promptForMoveTarget(initialPath, "folder", folder.path);
       if (moveTarget === null) {
         return;
       }
@@ -706,6 +706,10 @@ var MoveToNewFolderPlugin = class extends import_obsidian5.Plugin {
       const targetFolderPath = (0, import_obsidian5.normalizePath)(
         moveTarget.parentPath.length > 0 ? `${moveTarget.parentPath}/${moveTarget.folderName}` : moveTarget.folderName
       );
+      if (targetFolderPath === folder.path || targetFolderPath.startsWith(folder.path + "/")) {
+        new import_obsidian5.Notice("Cannot move a folder into itself or one of its subfolders.");
+        return;
+      }
       const targetContainer = await this.ensureTargetFolder(targetFolderPath, "folder");
       if (targetContainer === "back") {
         continue;
@@ -714,6 +718,10 @@ var MoveToNewFolderPlugin = class extends import_obsidian5.Plugin {
         return;
       }
       const targetChildPath = (0, import_obsidian5.normalizePath)(`${targetContainer.path}/${folder.name}`);
+      if (targetChildPath === folder.path || targetChildPath.startsWith(folder.path + "/")) {
+        new import_obsidian5.Notice("Cannot move a folder into itself or one of its subfolders.");
+        return;
+      }
       const existingDestination = this.app.vault.getAbstractFileByPath(targetChildPath);
       if (existingDestination && existingDestination.path !== folder.path) {
         new import_obsidian5.Notice(`Move canceled: folder already exists at "${targetChildPath}".`);
@@ -777,9 +785,15 @@ var MoveToNewFolderPlugin = class extends import_obsidian5.Plugin {
       modal.open();
     });
   }
-  async promptForMoveTarget(initialPath, targetKind) {
+  async promptForMoveTarget(initialPath, targetKind, excludeFolderPath) {
+    let paths = this.getFolderPaths();
+    if (excludeFolderPath !== void 0 && excludeFolderPath.length > 0) {
+      paths = paths.filter(
+        (p) => p !== excludeFolderPath && !p.startsWith(excludeFolderPath + "/")
+      );
+    }
     return new Promise((resolve) => {
-      const modal = new MoveToNewFolderModal(this.app, this.getFolderPaths(), initialPath, targetKind, (result) => {
+      const modal = new MoveToNewFolderModal(this.app, paths, initialPath, targetKind, (result) => {
         resolve(result);
       });
       modal.open();
