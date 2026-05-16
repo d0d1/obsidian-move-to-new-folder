@@ -2,7 +2,7 @@
 
 [![Obsidian Community plugin](https://img.shields.io/badge/Obsidian-Community%20plugin-7c3aed?logo=obsidian&logoColor=white)](https://community.obsidian.md/plugins/move-to-new-folder)
 [![GitHub release](https://img.shields.io/github/v/release/d0d1/obsidian-move-to-new-folder?label=release)](https://github.com/d0d1/obsidian-move-to-new-folder/releases/latest)
-[![License](https://img.shields.io/github/license/d0d1/obsidian-move-to-new-folder)](LICENSE)
+[![License: GPL-3.0-only](https://img.shields.io/badge/license-GPL--3.0--only-blue)](LICENSE)
 
 `Move to New Folder` is an Obsidian [community plugin](https://community.obsidian.md/plugins/move-to-new-folder) that moves a file or folder into a newly created folder without requiring you to type the full destination path.
 
