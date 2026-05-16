@@ -1,6 +1,6 @@
 {
   "name": "move-to-new-folder",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Obsidian plugin for a better move-to-new-folder workflow",
   "main": "main.js",
   "scripts": {
@@ -15,7 +15,6 @@
   "license": "GPL-3.0-only",
   "devDependencies": {
     "@types/node": "^20.17.57",
-    "builtin-modules": "^4.0.0",
     "esbuild": "^0.25.3",
     "obsidian": "^1.8.10",
     "tslib": "^2.8.1",

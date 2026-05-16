@@ -53,8 +53,11 @@ export default class MoveToNewFolderPlugin extends Plugin {
   }
 
   async loadSettings(): Promise<void> {
-    const loaded = await this.loadData();
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, loaded);
+    const loaded: unknown = await this.loadData();
+    this.settings = {
+      ...DEFAULT_SETTINGS,
+      ...this.parseSettings(loaded),
+    };
   }
 
   async saveSettings(): Promise<void> {
@@ -336,5 +339,23 @@ export default class MoveToNewFolderPlugin extends Plugin {
 
   private isMarkdownFile(file: TAbstractFile): file is TFile {
     return file instanceof TFile && file.extension === "md";
+  }
+
+  private parseSettings(data: unknown): Partial<MoveToNewFolderSettings> {
+    if (!this.isRecord(data)) {
+      return {};
+    }
+
+    const settings: Partial<MoveToNewFolderSettings> = {};
+    const defaultToCurrentParent = data.defaultToCurrentParent;
+    if (typeof defaultToCurrentParent === "boolean") {
+      settings.defaultToCurrentParent = defaultToCurrentParent;
+    }
+
+    return settings;
+  }
+
+  private isRecord(data: unknown): data is Record<string, unknown> {
+    return typeof data === "object" && data !== null;
   }
 }

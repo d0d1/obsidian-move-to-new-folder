@@ -194,7 +194,7 @@ export class MoveToNewFolderModal extends Modal {
       this.refreshSelection(listEl, filtered, scrollBehavior);
 
       if (scrollBehavior === "initial" && !this.hasRevealedInitialSelection) {
-        this.revealInitialSelection(listEl);
+        this.revealInitialSelection();
       }
     };
 
@@ -452,7 +452,7 @@ export class MoveToNewFolderModal extends Modal {
     this.refreshSelection(listEl, filtered, "preserve");
   }
 
-  private revealInitialSelection(listEl: HTMLElement): void {
+  private revealInitialSelection(): void {
     const selectedButton = this.listByPath.get(this.selectedPath);
     if (!selectedButton) {
       return;

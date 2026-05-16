@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 jobs:
   build:
@@ -25,15 +27,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Verify release tag matches manifest version
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          node -e "const manifest = require('./manifest.json'); if (manifest.version !== process.env.RELEASE_TAG) { console.error('Release tag ' + process.env.RELEASE_TAG + ' does not match manifest version ' + manifest.version); process.exit(1); }"
+
       - name: Build plugin
         run: npm run build
 
-      - name: Create release zip
-        run: |
-          mkdir -p release
-          cp manifest.json main.js styles.css release/
-          cd release
-          zip -r "../move-to-new-folder-${{ github.event.release.tag_name }}.zip" .
+      - name: Attest release assets
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be
+        with:
+          subject-path: |
+            manifest.json
+            main.js
+            styles.css
 
       - name: Upload release assets
         env:
@@ -43,6 +52,4 @@ jobs:
             manifest.json \
             main.js \
             styles.css \
-            versions.json \
-            move-to-new-folder-${{ github.event.release.tag_name }}.zip \
             --clobber

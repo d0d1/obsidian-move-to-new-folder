@@ -1,6 +1,41 @@
 # Move to New Folder
 
-`Move to New Folder` is an Obsidian community plugin that moves a file or folder into a newly created folder without requiring you to type the full destination path.
+[![Obsidian Community plugin](https://img.shields.io/badge/Obsidian-Community%20plugin-7c3aed?logo=obsidian&logoColor=white)](https://community.obsidian.md/plugins/move-to-new-folder)
+[![GitHub release](https://img.shields.io/github/v/release/d0d1/obsidian-move-to-new-folder?label=release)](https://github.com/d0d1/obsidian-move-to-new-folder/releases/latest)
+[![License](https://img.shields.io/github/license/d0d1/obsidian-move-to-new-folder)](LICENSE)
+
+`Move to New Folder` is an Obsidian [community plugin](https://community.obsidian.md/plugins/move-to-new-folder) that moves a file or folder into a newly created folder without requiring you to type the full destination path.
+
+## Installation
+
+### From Community plugins
+
+Install from Obsidian's Community plugins directory:
+
+1. Open **Settings** in Obsidian
+2. Go to **Community plugins** and choose **Browse**
+3. Search for **Move to New Folder**
+4. Select **Install**, then **Enable**
+
+You can also open the listing directly: <https://community.obsidian.md/plugins/move-to-new-folder>
+
+<details>
+<summary>Advanced install options</summary>
+
+### Manual install from GitHub release
+
+If you cannot use Community plugins, install the latest GitHub release manually:
+
+1. Download `manifest.json`, `main.js`, and `styles.css` from the latest release
+2. Create the folder `.obsidian/plugins/move-to-new-folder/` in your vault if it does not already exist
+3. Copy the downloaded files into that folder
+4. Enable **Move to New Folder** in Obsidian
+
+### BRAT beta testing
+
+Use BRAT only if you intentionally want to test unreleased changes from this repository. Community plugins is the recommended install path for normal use.
+
+</details>
 
 ## What it does
 
@@ -41,24 +76,6 @@ Folder moves are supported from the file explorer context menu.
 - Designed for desktop and mobile
 - Tested on Windows, Android, and Linux
 - macOS and iOS have not been fully validated yet
-
-## Install with BRAT
-
-This plugin is available via BRAT and GitHub releases before it is listed in Community Plugins.
-
-1. Install and enable the BRAT plugin in Obsidian
-2. In BRAT, choose to add a beta plugin from GitHub
-3. Enter `d0d1/obsidian-move-to-new-folder`
-4. Install **Move to New Folder** from BRAT
-
-## Install from GitHub release
-
-If you prefer not to use BRAT, you can install the plugin from the latest GitHub release:
-
-1. Download `move-to-new-folder-<version>.zip` from the latest release
-2. Create the folder `.obsidian/plugins/move-to-new-folder/` in your vault if it does not already exist
-3. Extract the ZIP contents into that folder
-4. Enable **Move to New Folder** in Obsidian
 
 ## Privacy and external services
 

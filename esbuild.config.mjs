@@ -1,8 +1,16 @@
 import esbuild from "esbuild";
+import { builtinModules } from "node:module";
 import process from "process";
-import builtins from "builtin-modules";
 
 const prod = process.argv[2] === "production";
+const builtinExternals = Array.from(
+  new Set(
+    builtinModules.flatMap((moduleName) => {
+      const bareModuleName = moduleName.replace(/^node:/, "");
+      return [bareModuleName, `node:${bareModuleName}`];
+    }),
+  ),
+);
 
 const context = await esbuild.context({
   entryPoints: ["src/main.ts"],
@@ -21,7 +29,7 @@ const context = await esbuild.context({
     "@lezer/common",
     "@lezer/highlight",
     "@lezer/lr",
-    ...builtins,
+    ...builtinExternals,
   ],
   format: "cjs",
   target: "es2018",

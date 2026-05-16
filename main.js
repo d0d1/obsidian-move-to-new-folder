@@ -327,7 +327,7 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
       });
       this.refreshSelection(listEl, filtered, scrollBehavior);
       if (scrollBehavior === "initial" && !this.hasRevealedInitialSelection) {
-        this.revealInitialSelection(listEl);
+        this.revealInitialSelection();
       }
     };
     searchInput.addEventListener("input", () => {
@@ -533,7 +533,7 @@ var MoveToNewFolderModal = class extends import_obsidian3.Modal {
     this.selectedPath = filtered[this.selectedIndex];
     this.refreshSelection(listEl, filtered, "preserve");
   }
-  revealInitialSelection(listEl) {
+  revealInitialSelection() {
     const selectedButton = this.listByPath.get(this.selectedPath);
     if (!selectedButton) {
       return;
@@ -626,7 +626,10 @@ var MoveToNewFolderPlugin = class extends import_obsidian5.Plugin {
   }
   async loadSettings() {
     const loaded = await this.loadData();
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, loaded);
+    this.settings = {
+      ...DEFAULT_SETTINGS,
+      ...this.parseSettings(loaded)
+    };
   }
   async saveSettings() {
     await this.saveData(this.settings);
@@ -845,5 +848,19 @@ var MoveToNewFolderPlugin = class extends import_obsidian5.Plugin {
   }
   isMarkdownFile(file) {
     return file instanceof import_obsidian5.TFile && file.extension === "md";
+  }
+  parseSettings(data) {
+    if (!this.isRecord(data)) {
+      return {};
+    }
+    const settings = {};
+    const defaultToCurrentParent = data.defaultToCurrentParent;
+    if (typeof defaultToCurrentParent === "boolean") {
+      settings.defaultToCurrentParent = defaultToCurrentParent;
+    }
+    return settings;
+  }
+  isRecord(data) {
+    return typeof data === "object" && data !== null;
   }
 };
