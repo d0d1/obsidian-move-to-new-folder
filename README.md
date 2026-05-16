@@ -2,9 +2,9 @@
 
 [![Obsidian Community plugin](https://img.shields.io/badge/Obsidian-Community%20plugin-7c3aed?logo=obsidian&logoColor=white)](https://community.obsidian.md/plugins/move-to-new-folder)
 [![GitHub release](https://img.shields.io/github/v/release/d0d1/obsidian-move-to-new-folder?label=release)](https://github.com/d0d1/obsidian-move-to-new-folder/releases/latest)
-[![License: GPL-3.0-only](https://img.shields.io/badge/license-GPL--3.0--only-blue)](LICENSE)
+[![License: GPL-3.0-only](https://img.shields.io/badge/license-GPL--3.0--only-blue)](https://github.com/d0d1/obsidian-move-to-new-folder/blob/main/LICENSE)
 
-`Move to New Folder` is an Obsidian [community plugin](https://community.obsidian.md/plugins/move-to-new-folder) that moves a file or folder into a newly created folder without requiring you to type the full destination path.
+`Move to New Folder` is an Obsidian community plugin that moves a file or folder into a newly created folder without requiring you to type the full destination path.
 
 ## What it does
 
@@ -57,8 +57,6 @@ Install from Obsidian's Community plugins directory:
 3. Search for **Move to New Folder**
 4. Select **Install**, then **Enable**
 
-You can also open the listing directly: <https://community.obsidian.md/plugins/move-to-new-folder>
-
 <details>
 <summary>Manual install from GitHub release</summary>
 
@@ -82,5 +80,5 @@ If you cannot use Community plugins, install the latest GitHub release manually:
 
 ## Docs
 
-- [Use cases](docs/use-cases.md)
-- [FAQ](docs/faq.md)
+- [Use cases](https://github.com/d0d1/obsidian-move-to-new-folder/blob/main/docs/use-cases.md)
+- [FAQ](https://github.com/d0d1/obsidian-move-to-new-folder/blob/main/docs/faq.md)
