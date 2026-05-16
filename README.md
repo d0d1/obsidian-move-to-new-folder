@@ -6,37 +6,6 @@
 
 `Move to New Folder` is an Obsidian [community plugin](https://community.obsidian.md/plugins/move-to-new-folder) that moves a file or folder into a newly created folder without requiring you to type the full destination path.
 
-## Installation
-
-### From Community plugins
-
-Install from Obsidian's Community plugins directory:
-
-1. Open **Settings** in Obsidian
-2. Go to **Community plugins** and choose **Browse**
-3. Search for **Move to New Folder**
-4. Select **Install**, then **Enable**
-
-You can also open the listing directly: <https://community.obsidian.md/plugins/move-to-new-folder>
-
-<details>
-<summary>Advanced install options</summary>
-
-### Manual install from GitHub release
-
-If you cannot use Community plugins, install the latest GitHub release manually:
-
-1. Download `manifest.json`, `main.js`, and `styles.css` from the latest release
-2. Create the folder `.obsidian/plugins/move-to-new-folder/` in your vault if it does not already exist
-3. Copy the downloaded files into that folder
-4. Enable **Move to New Folder** in Obsidian
-
-### BRAT beta testing
-
-Use BRAT only if you intentionally want to test unreleased changes from this repository. Community plugins is the recommended install path for normal use.
-
-</details>
-
 ## What it does
 
 - Adds `Move file to new folder...` for notes
@@ -76,6 +45,31 @@ Folder moves are supported from the file explorer context menu.
 - Designed for desktop and mobile
 - Tested on Windows, Android, and Linux
 - macOS and iOS have not been fully validated yet
+
+## Installation
+
+### From Community plugins
+
+Install from Obsidian's Community plugins directory:
+
+1. Open **Settings** in Obsidian
+2. Go to **Community plugins** and choose **Browse**
+3. Search for **Move to New Folder**
+4. Select **Install**, then **Enable**
+
+You can also open the listing directly: <https://community.obsidian.md/plugins/move-to-new-folder>
+
+<details>
+<summary>Manual install from GitHub release</summary>
+
+If you cannot use Community plugins, install the latest GitHub release manually:
+
+1. Download `manifest.json`, `main.js`, and `styles.css` from the latest release
+2. Create the folder `.obsidian/plugins/move-to-new-folder/` in your vault if it does not already exist
+3. Copy the downloaded files into that folder
+4. Enable **Move to New Folder** in Obsidian
+
+</details>
 
 ## Privacy and external services
 
